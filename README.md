@@ -15,9 +15,8 @@ contacts, how it was generated and which script regenerates it.
 | `OpenESC-30x30-QC/` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) | Same fixture rebuilt on the 30x30 pad geometry, unrouted |
 | `OpenESC-30x30-Flashing/` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) | The 20x20 station retargeted to the 30x30 test points, unrouted |
 
-The generators (`esc_qc_gen.py`, `esc_jig_retarget.py`) live in
-`OpenDrone-Scripts/esc/` and read the ESC design read-only, so the READMEs
-assume this repo is checked out next to the ESC repos.
+The READMEs reference the ESC designs as `../../<ESC repo>/hardware/`, so
+they assume this repo is checked out next to the ESC repos.
 
 ## Contributing
 
