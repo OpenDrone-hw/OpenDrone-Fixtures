@@ -66,7 +66,8 @@ datasheets/
 # ignore the 3D models inside lib.3dshapes/, which are committed.
 export/
 exports/
-/*/*.step    # fixture projects sit at the repo root
+# Fixture projects sit at the repo root, not under hardware/.
+/*/*.step
 **/bom/
 **/*_Paste.dxf
 **/*_Paste.svg
