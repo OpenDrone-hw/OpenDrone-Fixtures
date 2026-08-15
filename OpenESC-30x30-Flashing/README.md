@@ -21,21 +21,10 @@ from position, so SWD1 really is channel 1.
 
 Four 4-pin headers break out CLK, DIO and GND per channel for the ST-LINK probes.
 
-## Retargeted, not redrawn
+## Layout state
 
-```bash
-KPY=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
-$KPY ~/OpenDrone/software/OpenDrone-Scripts/esc/esc_jig_retarget.py \
-    ../OpenESC-20x20-Flashing/20x20-ESC-Flashing.kicad_pcb \
-    ../../OpenESC-30x30/hardware/4in1.kicad_pcb --dut 4in1ESC30x30 \
-    --strip-tracks --swap-outline 30 --retext "20x20=30x30" \
-    --out 30x30-ESC-Flashing.kicad_pcb
-```
-
-`--strip-tracks` clears the 20x20 routing, `--swap-outline` replaces the
-silkscreen ESC outline with the 30x30 one. **The board is unrouted**: the
-copper pours from the template are still in place and no longer match the new
-pin positions, so redo them.
+**The board is unrouted**: the copper pours from the 20x20 are still in place
+and no longer match the new pin positions, so redo them.
 
 ## Flashing
 
