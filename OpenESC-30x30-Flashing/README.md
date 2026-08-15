@@ -1,7 +1,7 @@
 # 30x30-ESC-Flashing: AM32 SWD flashing station
 
-SWD flashing jig for the **OpenESC-30x30** (`../hardware/4in1`). Retargeted copy
-of `OpenESC-20x20/20x20-ESC-Flashing`: same 100 x 100 mm 4-layer layout, same
+SWD flashing jig for the **OpenESC-30x30** (`../../OpenESC-30x30/hardware/4in1`). Retargeted copy
+of `OpenESC-20x20-Flashing`: same 100 x 100 mm 4-layer layout, same
 pogo pins, headers, banana jacks and M3 pattern. Only the ten pogo pins moved,
 to the coordinates the 30x30 actually uses.
 
@@ -26,8 +26,8 @@ Four 4-pin headers break out CLK, DIO and GND per channel for the ST-LINK probes
 ```bash
 KPY=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
 $KPY ~/OpenDrone/software/OpenDrone-Scripts/esc/esc_jig_retarget.py \
-    ../../OpenESC-20x20/20x20-ESC-Flashing/20x20-ESC-Flashing.kicad_pcb \
-    ../hardware/4in1.kicad_pcb --dut 4in1ESC30x30 \
+    ../OpenESC-20x20-Flashing/20x20-ESC-Flashing.kicad_pcb \
+    ../../OpenESC-30x30/hardware/4in1.kicad_pcb --dut 4in1ESC30x30 \
     --strip-tracks --swap-outline 30 --retext "20x20=30x30" \
     --out 30x30-ESC-Flashing.kicad_pcb
 ```
@@ -44,4 +44,4 @@ write the AM32 bootloader, then firmware and settings over the DShot signal pin.
 Host side is `../../OpenESC-20x20/hardware/flash_openesc20.sh` (OpenOCD,
 AT32F421 FAP unlock, verify, `--loop` for batches).
 
-License: hardware CERN-OHL-S-2.0, same as the parent repo.
+License: hardware CERN-OHL-S-2.0, same as the ESC.
