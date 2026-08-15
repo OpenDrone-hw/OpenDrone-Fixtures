@@ -8,8 +8,8 @@ Pogo pins land on the ESC's B.Cu face: `/SWD1_CLK` … `/SWD4_CLK` on each
 channel's PA14 test point, `/SWD1_DIO` … `/SWD4_DIO` on PA13, plus `/VBAT` and
 `GND` on the battery pads so the target is powered while flashing.
 
-The 30x30 version is `../OpenESC-30x30-Flashing`, produced from this
-board by `~/OpenDrone/software/OpenDrone-Scripts/esc/esc_jig_retarget.py`.
+The 30x30 version is `../OpenESC-30x30-Flashing`, a copy of this board with
+the pogo pins moved.
 
 ## Flashing
 

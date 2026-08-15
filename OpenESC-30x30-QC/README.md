@@ -24,22 +24,6 @@ row fan out to solder pads at the board edge.
   because the fixture is 100 x 100 either way.
 - **Nothing is routed.** Placement, pads, pocket and outline only.
 
-## Generated, not drawn
-
-Both the negative and the board come out of
-`~/OpenDrone/software/OpenDrone-Scripts/esc/esc_qc_gen.py`, which reads the ESC design read-only,
-so the contact geometry cannot drift from the board it tests:
-
-```bash
-KPY=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
-$KPY ~/OpenDrone/software/OpenDrone-Scripts/esc/esc_qc_gen.py ../../OpenESC-30x30/hardware/4in1.kicad_pcb \
-    --dut 4in1ESC30x30 --lib ESC-QC.pretty --out 30x30-ESC-QC.kicad_pcb
-```
-
-Regenerating overwrites the board, so route last. Run against
-`../../OpenESC-20x20/hardware/4in1-mini.kicad_pcb --dut 4in1ESC` and it
-reproduces the 20x20 fixture, pocket included, to within 0.05 mm.
-
 ## Reference geometry
 
 Taken read-only from `../../OpenESC-30x30/hardware/4in1.kicad_pcb`; nothing in the ESC design is
