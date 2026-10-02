@@ -1,6 +1,6 @@
 # 20x20-ESC-QC: press-contact QC fixture
 
-Bench test/QC jig for the **OpenESC-20x20** (`../../OpenESC-20x20/hardware/4in1-mini`). The
+Bench test/QC jig for the **OpenESC-20x20** ([`OpenESC-20x20/hardware/4in1-mini`](https://github.com/OpenDrone-hw/OpenESC-20x20/blob/main/hardware/4in1-mini.kicad_pro)). The
 assembled ESC is pressed face-down onto this board so spring/pogo contacts land
 on the ESC's exposed pads (power in, three phases per channel, signal lines) to
 run functional and current-transfer tests without soldering leads.
@@ -28,7 +28,7 @@ of its exposed pads.
 
 The contact locations must match the ESC's exposed pads exactly. Pad
 coordinates and nets are extracted read-only from the source board,
-`../../OpenESC-20x20/hardware/4in1-mini.kicad_pcb` (kicad-cli or the pcbnew API); nothing in the
+[`OpenESC-20x20/hardware/4in1-mini.kicad_pcb`](https://github.com/OpenDrone-hw/OpenESC-20x20/blob/main/hardware/4in1-mini.kicad_pcb) (kicad-cli or the pcbnew API); nothing in the
 ESC design is modified.
 
 ## Contacts to hit (from the ESC design)

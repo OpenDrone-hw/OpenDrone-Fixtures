@@ -1,6 +1,6 @@
 # 20x20-ESC-Flashing: AM32 SWD flashing station
 
-SWD flashing jig for the **OpenESC-20x20** (`../../OpenESC-20x20/hardware/4in1-mini`). 100 x 100 mm,
+SWD flashing jig for the **OpenESC-20x20** ([`OpenESC-20x20/hardware/4in1-mini`](https://github.com/OpenDrone-hw/OpenESC-20x20/blob/main/hardware/4in1-mini.kicad_pro)). 100 x 100 mm,
 4 layer, ten 1.2 mm SMD pogo pins, four ST-LINK breakout headers, 4 mm banana
 jacks for target power, M3 corners. Fabbed as `20x20-flashing-V0.1`.
 
@@ -15,7 +15,7 @@ the pogo pins moved.
 
 SWD once per MCU to clear readout protection and write the AM32 bootloader, then
 firmware and settings over the DShot signal pin. Host side is
-`../../OpenESC-20x20/hardware/flash_openesc20.sh`: OpenOCD, AT32F421 FAP unlock, program and
+[`OpenESC-20x20/hardware/flash_openesc20.sh`](https://github.com/OpenDrone-hw/OpenESC-20x20/blob/main/hardware/flash_openesc20.sh): OpenOCD, AT32F421 FAP unlock, program and
 verify bootloader plus firmware, `--loop` to auto-flash the next board on ST-LINK
 reconnect.
 
