@@ -1,6 +1,6 @@
 # 30x30-ESC-Flashing: AM32 SWD flashing station
 
-SWD flashing jig for the **OpenESC-30x30** (`../../OpenESC-30x30/hardware/4in1`). Retargeted copy
+SWD flashing jig for the **OpenESC-30x30** ([`OpenESC-30x30/hardware/4in1`](https://github.com/OpenDrone-hw/OpenESC-30x30/blob/main/hardware/4in1.kicad_pro)). Retargeted copy
 of `OpenESC-20x20-Flashing`: same 100 x 100 mm 4-layer layout, same
 pogo pins, headers, banana jacks and M3 pattern. Only the ten pogo pins moved,
 to the coordinates the 30x30 actually uses.
@@ -30,7 +30,7 @@ and no longer match the new pin positions, so redo them.
 
 Two-stage, as on the 20x20: SWD once per MCU to clear readout protection and
 write the AM32 bootloader, then firmware and settings over the DShot signal pin.
-Host side is `../../OpenESC-20x20/hardware/flash_openesc20.sh` (OpenOCD,
+Host side is [`OpenESC-20x20/hardware/flash_openesc20.sh`](https://github.com/OpenDrone-hw/OpenESC-20x20/blob/main/hardware/flash_openesc20.sh) (OpenOCD,
 AT32F421 FAP unlock, verify, `--loop` for batches).
 
 License: hardware CERN-OHL-S-2.0, same as the ESC.

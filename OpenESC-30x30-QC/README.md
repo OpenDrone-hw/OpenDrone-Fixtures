@@ -1,6 +1,6 @@
 # 30x30-ESC-QC: press-contact QC fixture
 
-Bench test/QC jig for the **OpenESC-30x30** (`../../OpenESC-30x30/hardware/4in1`). Same fixture as
+Bench test/QC jig for the **OpenESC-30x30** ([`OpenESC-30x30/hardware/4in1`](https://github.com/OpenDrone-hw/OpenESC-30x30/blob/main/hardware/4in1.kicad_pro)). Same fixture as
 `OpenESC-20x20-QC`, rebuilt against the 30x30 pad geometry.
 
 The board is a **negative** of the ESC contact face. The ESC drops into an
@@ -26,7 +26,7 @@ row fan out to solder pads at the board edge.
 
 ## Reference geometry
 
-Taken read-only from `../../OpenESC-30x30/hardware/4in1.kicad_pcb`; nothing in the ESC design is
+Taken read-only from [`OpenESC-30x30/hardware/4in1.kicad_pcb`](https://github.com/OpenDrone-hw/OpenESC-30x30/blob/main/hardware/4in1.kicad_pcb); nothing in the ESC design is
 modified. ESC outline 41.58 x 42.50 mm. Battery pads 4.5 x 15 mm. Phase pads
 2.2 x 3.6 mm, two per phase. Signal row 8 x (4 x 1 mm) on 1.5 mm pitch.
 Mounting 4.0 mm drill on 30.5 mm pitch. Pocket comes out 37.06 x 38.15 mm with a
