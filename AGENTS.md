@@ -22,8 +22,8 @@ QC fixture also uses KiCad's stock `TestPoint` footprints. There is no
 per directory. License CERN-OHL-S-2.0.
 
 Contact geometry is extracted read-only from the ESC board a fixture serves
-(`../../OpenESC-20x20/hardware/4in1-mini.kicad_pcb`,
-`../../OpenESC-30x30/hardware/4in1.kicad_pcb`, sibling checkouts). Keep each
+(`../OpenESC-20x20/hardware/4in1-mini.kicad_pcb` and
+`../OpenESC-30x30/hardware/4in1.kicad_pcb` from this repository's root, sibling checkouts). Keep each
 fixture traceable to the DUT revision it was extracted from, and verify pin
 and connector mappings against both designs before a change.
 
