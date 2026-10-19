@@ -35,10 +35,9 @@
 <div id="panel">
   <h1>OpenMotor seesaw</h1>
   <div class="sub" id="sub">loading model.json</div>
-  <label for="tilt">Beam tilt: <span id="tilt-val">0.0</span> deg (motor end down is positive)</label>
+  <label for="tilt">Arm tilt: <span id="tilt-val">0.0</span> deg (motor end down is positive)</label>
   <input id="tilt" type="range" min="-20" max="20" step="0.1" value="0">
   <div class="row"><input id="explode" type="checkbox"><label for="explode">Exploded view</label></div>
-  <div class="row"><input id="guard" type="checkbox"><label for="guard">Prop guard (optional parts)</label></div>
   <div class="row"><input id="wood" type="checkbox" checked><label for="wood">Show ply texture</label></div>
 </div>
 <div id="tip"></div>
@@ -95,7 +94,7 @@ const mats = {
   metal: new THREE.MeshStandardMaterial({ color: 0xb9c0c8, metalness: 0.95, roughness: 0.28 }),
   motor: new THREE.MeshStandardMaterial({ color: 0x2a2f36, metalness: 0.6, roughness: 0.4 }),
   prop: new THREE.MeshStandardMaterial({ color: 0x4b6584, transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false }),
-  bucket: new THREE.MeshStandardMaterial({ color: 0xd9534f, roughness: 0.6, side: THREE.DoubleSide }),
+  print: new THREE.MeshStandardMaterial({ color: 0x4f86c6, roughness: 0.55 }),
 };
 const edgeMat = new THREE.LineBasicMaterial({ color: 0x6b4a26 });
 
@@ -125,11 +124,10 @@ function cylGeometry(it) {
   return new THREE.CylinderGeometry(it.r, it.rbot, it.h, it.segs, 1, open);
 }
 
-let bucketGroup = null, handle = null, model = null;
+let model = null;
 function build(m) {
   model = m;
   for (const it of m.items) {
-    if (it.group === "hang") continue;
     const geo = it.type === "plate" ? plateGeometry(it) : cylGeometry(it);
     const mesh = new THREE.Mesh(geo, mats[it.material]);
     mesh.userData.label = it.label;
@@ -157,28 +155,15 @@ function build(m) {
   }
   beam.position.set(0, m.params.pivot_h, 0);
 
-  // bucket hangs vertically from the hook
-  const b = m.items.find((i) => i.group === "hang");
-  bucketGroup = new THREE.Group();
-  const bm = new THREE.Mesh(cylGeometry(b), mats.bucket);
-  bm.userData.label = b.label;
-  bm.position.y = -b.h / 2 - 45;
-  bucketGroup.add(bm); meshes.push(bm);
-  scene.add(bucketGroup);
-  handle = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x333333 }));
-  scene.add(handle);
-  bucketGroup.userData.rim = b.r; bucketGroup.userData.holder = { explode: b.explode };
-  holders.push({ holder: bucketGroup, explode: b.explode, group: "hang", bucket: true });
-
   document.getElementById("sub").textContent =
-    `ply ${m.params.ply} mm, arm ${m.params.arm} mm, pivot ${m.params.pivot_h} mm, stops +-${m.params.max_tilt} deg`;
+    `ply ${m.params.ply} mm, arm ${m.params.arm} mm, pivot ${m.params.pivot_h} mm, M8 x ${m.params.bolt_len} bolt, no end stops`;
   const tilt = document.getElementById("tilt");
-  tilt.min = -m.params.max_tilt; tilt.max = m.params.max_tilt;
+  tilt.min = -m.params.travel; tilt.max = m.params.travel;
 }
 
 const ui = {
   tilt: document.getElementById("tilt"), explode: document.getElementById("explode"),
-  guard: document.getElementById("guard"), wood: document.getElementById("wood"),
+  wood: document.getElementById("wood"),
 };
 let explodeF = 0;
 const tmp = new THREE.Vector3();
@@ -189,21 +174,9 @@ function update() {
   beam.rotation.z = -THREE.MathUtils.degToRad(tiltDeg);
   explodeF += ((ui.explode.checked ? 1 : 0) - explodeF) * 0.12;
   for (const h of holders) {
-    if (h.variant) h.holder.visible = (h.variant === "guard") === ui.guard.checked;
-    if (!h.bucket) h.holder.position.set(...h.explode.map((v) => v * explodeF));
+    h.holder.position.set(...h.explode.map((v) => v * explodeF));
   }
   mats.wood.map = ui.wood.checked ? woodTex : null; mats.wood.needsUpdate = true;
-  // bucket follows the hook, stays vertical
-  beam.updateMatrixWorld(true);
-  tmp.set(...model.params.hook); beam.localToWorld(tmp);
-  bucketGroup.position.set(tmp.x, tmp.y - 40 + explodeF * -120 * 0, tmp.z);
-  const ex = -120 * explodeF;
-  bucketGroup.position.y = tmp.y + ex;
-  const r = bucketGroup.userData.rim * 0.85, topY = bucketGroup.position.y - 45;
-  handle.geometry.setFromPoints([
-    new THREE.Vector3(tmp.x, tmp.y, tmp.z), new THREE.Vector3(tmp.x, tmp.y, tmp.z),
-    new THREE.Vector3(tmp.x - r, topY, tmp.z), new THREE.Vector3(tmp.x, tmp.y, tmp.z),
-    new THREE.Vector3(tmp.x + r, topY, tmp.z)]);
 }
 
 // hover labels

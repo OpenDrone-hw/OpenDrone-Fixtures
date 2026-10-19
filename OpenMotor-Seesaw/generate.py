@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """OpenMotor seesaw: parametric laser-cut generator (Python stdlib only).
 
-Writes, next to this script:
+Five 8 mm ply plates (base, two towers, arm, bucket plate) plus one printed
+motor mount (motor_mount.scad). Writes, next to this script:
   cut/sheet-N.svg / .dxf     cut files, red 0.01 mm hairline, 600 x 400 mm sheets
-  cut/optional-N.svg / .dxf  optional prop guard parts (own sheet)
   images/sheet-N.png         labelled preview (only if rsvg-convert exists)
   viewer/model.json          exact cut contours + assembly, read by viewer/index.html
+  motor_mount_params.scad    numbers shared with motor_mount.scad
 
 All dimensions in mm. Edit the parameter block, rerun, commit the output.
 Kerf rule: only fit-critical features are compensated (holes smaller by KERF,
 slots narrower by KERF, tabs wider by KERF). Outer outlines are not offset.
 """
-import argparse
 import json
 import math
 import os
@@ -21,60 +21,65 @@ import subprocess
 # ------------------------------------------------------------------ parameters
 PLY_T = 8.0            # plywood thickness (measure your sheet, ply varies +-0.3)
 KERF = 0.15            # laser kerf; ask the cutter or cut a test slot
-SLOT_FIT = 0.05        # extra slot width over PLY_T (0 = very tight, glue joints)
+SLOT_FIT = 0.05        # extra slot width over PLY_T
 BEARING_OD = 22.0      # 608ZZ
 BEARING_ID = 8.0
 BEARING_W = 7.0
 PRESS_FIT = 0.10       # seat is this much smaller than the bearing OD
-ROD_D = 8.0            # M8 bolt or rod
-ROD_LEN = 80.0         # M8 x 80 full thread
-NUT_AF = 13.0          # M8 nut across flats (ISO 4032)
-NUT_H = 6.8
-HEX_CLR = 0.2          # hex pocket clearance over NUT_AF
-ARM = 250.0            # pivot axis to motor axis = pivot axis to bucket hook
-PIVOT_H = 250.0        # pivot axis height above the table
-MAX_TILT = 20.0        # end stops, degrees each way
-BEAM_H = 40.0          # beam height
-BEAM_END = 22.0        # beam length beyond the motor axis / hook
-BEAM_PLIES = 3         # centre ply A + two outer plies B
-GAP_CLR = 3.0          # clearance beam to each upright
-BASE_LAYERS = 2        # glued layers
-BASE_L, BASE_W = 420.0, 240.0
-UPRIGHT_BASE = 220.0
-UPRIGHT_BOSS_R = 22.0
-TAB_W, TAB_X = 50.0, 70.0          # upright foot tabs (width, centre offset)
-TIE_Z = (60.0, 140.0)              # tie plate heights above the base top
-TIE_D = 40.0
-POST_X, POST_W, POST_TAB = 190.0, 60.0, 40.0   # stop posts
-MOTOR_PATTERN = 16.0   # 16 x 16 mm M3 (NOT verified for the OpenMotor 2306)
-M3_CLR = 3.2
-MOUNT_PLATE = 44.0
-MOUNT_TAB = 30.0
+BOLT_D = 8.0           # M8 fully threaded bolt (ISO 4017 / DIN 933) is the axle
+ARM_HOLE_CLR = 0.3     # arm hole is BOLT_D + this
+NUT_H = 6.8            # M8 nut (ISO 4032)
+NUT_AF = 13.0
+WASHER_T = 1.6         # M8 washer ISO 7089
+WASHER_OD = 16.0
+HEAD_H = 5.3           # M8 hex head
+BOLT_THREAD_OUT = 3.0  # bolt must stick out this far past the outer nut (2 threads)
+STD_BOLT_LEN = (50, 55, 60, 65, 70, 80, 90, 100)
+ARM = 250.0            # pivot axis to motor axis = pivot axis to bucket plate centre
+ARM_END = 25.0         # arm length beyond the motor axis / bucket centre
+ARM_H = 40.0           # arm height (plate on edge)
+PIVOT_H = 190.0        # pivot axis height above the table
+TRAVEL_DEG = 25.0      # design target: tip clear of the table up to this tilt
+HOLE_D = 3.4           # M3 clearance
+GRID_PITCH = 10.0      # mounting grid: M3, 10 mm pitch
+GRID_COLS, GRID_ROWS = 4, 3
+GRID_C = ARM - 40.0    # grid centre, distance from the pivot (both ends)
+BASE_L, BASE_W = 300.0, 220.0
+TOWER_FOOT = 160.0     # tower plate foot width
+TOWER_TAB = 120.0      # tab width (one slot per tower)
+BOSS_R = 22.0
+BUCKET_PLATE = (130.0, 130.0)      # along the arm, across the arm
+BUCKET_ROWS_Y = (14.0, 24.0)       # grid rows either side of the arm (y offsets)
+# printed motor mount (see motor_mount.scad)
+MOUNT_WALL = 4.0
+MOUNT_CLR = 0.2        # gap each side between arm and mount side plates
+MOUNT_GAP = 3.0        # platform floats this far above the arm top
+MOUNT_PLAT_T = 4.0
+MOUNT_PLAT_W = 32.0
+MOUNT_SIDE_HALF = 21.0
+MOTOR_PATTERNS = (16.0, 19.0)      # M3, slotted to cover both
+CENTER_D = 14.0        # shaft and circlip clearance (estimate)
 PROP_D = 127.0         # 5 inch prop disc
-PROP_PLANE = 36.0      # prop plane above motor plate top (ESTIMATE, measure)
-MOTOR_D, MOTOR_H = 28.0, 31.0      # 2306 bell envelope for the 3D model (ESTIMATE)
-GUARD_ID, GUARD_OD = 134.0, 166.0
-GUARD_PLATE_W = 170.0
-GUARD_LEG_Y = 75.0
-CW_SLOT = (115.0, 215.0)   # counterweight slot, distance from pivot, bucket side
-CW_BOLT = 5.5              # M5 clearance
-HOOK_D = 10.0
+PROP_PLANE = 36.0      # prop plane above the platform top (ESTIMATE, measure)
+MOTOR_D, MOTOR_H = 28.0, 31.0      # 2306 envelope (ESTIMATE)
 SHEET_W, SHEET_H = 600.0, 400.0
 SHEET_MARGIN, SHEET_GAP = 5.0, 4.0
 THRUST_G = 1711.0
 PLY_DENSITY = 0.68         # g/cm3 birch ply
-BEARING_MOUNT = "press"    # "press" or "printed" (see bearing_housing.scad)
-PRINTED_HOLE = 12.0
 
 # ------------------------------------------------------------------ derived
 T = PLY_T
-BEAM_T = BEAM_PLIES * T
-G = BEAM_T + 2 * GAP_CLR          # inner distance between the uprights
-BASE_T = BASE_LAYERS * T
-TAB_LEN = BASE_T
-UP_H = PIVOT_H - BASE_T           # pivot axis height above the base top
-PLATE_TOP = BEAM_H / 2 + T        # motor plate top, beam frame
-LEG_H = PROP_PLANE - T / 2
+INNER_STACK = 2 * (NUT_H + NUT_H + WASHER_T) + T      # between the two inner race faces
+G = INNER_STACK - 2 * (T - BEARING_W)                 # inner distance between the towers
+TOWER_Y = G / 2 + T / 2
+UP_H = PIVOT_H - T                                    # pivot height above the base top
+TAB_LEN = T
+BOLT_LEN_MIN = (G + 2 * T) + 2 * WASHER_T + NUT_H + BOLT_THREAD_OUT   # head underside to tip
+BOLT_LEN = min(l for l in STD_BOLT_LEN if l >= BOLT_LEN_MIN)
+MOTOR_X = ARM - GRID_C                                # motor axis from the grid centre
+PLAT_X1 = MOTOR_X + 22.0
+SIDE_Z0 = -ARM_H / 2 - 16.0                           # side plate bottom, arm top = 0
+PLAT_TOP = ARM_H / 2 + MOUNT_GAP + MOUNT_PLAT_T       # beam frame, above the pivot axis
 
 
 def rect(x0, y0, x1, y1):
@@ -154,112 +159,96 @@ class Part:
 
 
 # ------------------------------------------------------------------ geometry
-def stop_post_height():
-    """Height of the stop post top above the base top so the beam bottom edge
-    touches it at MAX_TILT (beam bottom edge, post at x = POST_X)."""
-    th = math.radians(MAX_TILT)
-    u = (POST_X + BEAM_H / 2 * math.sin(th)) / math.cos(th)
-    z_world = PIVOT_H - (u * math.sin(th) + BEAM_H / 2 * math.cos(th))
-    return z_world - BASE_T
+def radial_slot(cx, cy, r0, r1, ang, w):
+    """Slot along a ray from (cx,cy): centres at radius r0..r1, width w (actual)."""
+    c0 = (cx + r0 * math.cos(math.radians(ang)), cy + r0 * math.sin(math.radians(ang)))
+    c1 = (cx + r1 * math.cos(math.radians(ang)), cy + r1 * math.sin(math.radians(ang)))
+    return poly(arc(c1[0], c1[1], w / 2, ang - 90, ang + 90) + arc(c0[0], c0[1], w / 2, ang + 90, ang + 270))
+
+
+def grid_cols():
+    return [(c - (GRID_COLS - 1) / 2) * GRID_PITCH for c in range(GRID_COLS)]
+
+
+def grid_rows():
+    return [(r - (GRID_ROWS - 1) / 2) * GRID_PITCH for r in range(GRID_ROWS)]
 
 
 def make_parts():
     parts = []
-    # base (two glued layers)
-    holes = []
-    for sy in (-1, 1):
-        for tx in (-TAB_X, TAB_X):
-            holes.append(slot(tx, sy * (G / 2 + T / 2), TAB_W, T + SLOT_FIT))
-    for sx in (-1, 1):
-        holes.append(slot(sx * POST_X, 0, T + SLOT_FIT, POST_TAB))
+    # 1 base
+    holes = [slot(0, sy * TOWER_Y, TOWER_TAB, T + SLOT_FIT) for sy in (-1, 1)]
     for sx in (-1, 1):
         for sy in (-1, 1):
-            holes.append(hole(sx * 195, sy * 100, 6.5))          # clamp / bolt holes
+            holes.append(hole(sx * (BASE_L / 2 - 15), sy * (BASE_W / 2 - 20), 6.5))   # clamp holes
     for x in (-20, 20):
-        for y in (55, 90):
-            holes.append(slot(x, y, 12, 3.5))                     # ESC zip tie slots
-    parts.append(Part("base", "Base (glue %d layers)" % BASE_LAYERS,
-                      rrect(0, 0, BASE_L, BASE_W, 12), holes, qty=BASE_LAYERS))
+        for y in (50, 85):
+            holes.append(slot(x, y, 12, 3.5))                                          # ESC zip ties
+    parts.append(Part("base", "Base plate", rrect(0, 0, BASE_L, BASE_W, 12), holes))
 
-    # uprights (A-frame plate)
-    pts = [(-UPRIGHT_BASE / 2, 0)]
-    for tc in (-TAB_X, TAB_X):
-        tw = (TAB_W + KERF) / 2
-        pts += [(tc - tw, 0), (tc - tw, -TAB_LEN), (tc + tw, -TAB_LEN), (tc + tw, 0)]
-    pts += [(UPRIGHT_BASE / 2, 0), (UPRIGHT_BOSS_R, UP_H)]
-    pts += arc(0, UP_H, UPRIGHT_BOSS_R, 0, 180, 24)[1:-1]
-    pts += [(-UPRIGHT_BOSS_R, UP_H)]
-    holes = [slot(0, zt, TIE_D, T + SLOT_FIT) for zt in TIE_Z]
-    if BEARING_MOUNT == "press":
-        holes.append(hole(0, UP_H, BEARING_OD - PRESS_FIT))
-    else:
-        holes.append(hole(0, UP_H, PRINTED_HOLE))
-        for a in (45, 135, 225, 315):
-            holes.append(hole(16 * math.cos(math.radians(a)), UP_H + 16 * math.sin(math.radians(a)), M3_CLR))
-    parts.append(Part("upright", "Upright", pts, holes, qty=2))
+    # 2, 3 towers
+    def tower(name, label):
+        tw = (TOWER_TAB + KERF) / 2
+        pts = [(-TOWER_FOOT / 2, 0), (-tw, 0), (-tw, -TAB_LEN), (tw, -TAB_LEN), (tw, 0),
+               (TOWER_FOOT / 2, 0), (BOSS_R, UP_H)]
+        pts += arc(0, UP_H, BOSS_R, 0, 180, 24)[1:-1]
+        pts += [(-BOSS_R, UP_H)]
+        return Part(name, label, pts, [hole(0, UP_H, BEARING_OD - PRESS_FIT)])
+    parts.append(tower("tower_left", "Tower plate, left"))
+    parts.append(tower("tower_right", "Tower plate, right"))
 
-    # tie plates
-    tl = (G + 2 * T) / 2
-    td = (TIE_D + KERF) / 2
-    parts.append(Part("tie", "Tie plate", rect(-tl, -td, tl, td), [], qty=len(TIE_Z)))
+    # 4 arm
+    half = ARM + ARM_END
+    holes = [hole(0, 0, BOLT_D + ARM_HOLE_CLR)]
+    for s in (-1, 1):
+        for u in grid_cols():
+            for z in grid_rows():
+                holes.append(hole(s * GRID_C + u, z, HOLE_D))
+    parts.append(Part("arm", "Arm (single plate on edge)", rect(-half, -ARM_H / 2, half, ARM_H / 2), holes))
 
-    # stop posts
-    hp = stop_post_height()
-    tw = (POST_TAB + KERF) / 2
-    pts = [(-POST_W / 2, 0), (-tw, 0), (-tw, -TAB_LEN), (tw, -TAB_LEN), (tw, 0),
-           (POST_W / 2, 0), (POST_W / 2, hp), (-POST_W / 2, hp)]
-    parts.append(Part("post", "End stop post (felt on top)", pts, [], qty=2))
-
-    # beam plies
-    def beam(kind):
-        half = ARM + BEAM_END if kind == "A" else ARM - BEAM_END
-        if kind == "A":
-            tw2 = (MOUNT_TAB + KERF) / 2
-            pts = [(-half, -BEAM_H / 2), (half, -BEAM_H / 2), (half, BEAM_H / 2),
-                   (ARM + tw2, BEAM_H / 2), (ARM + tw2, BEAM_H / 2 + T),
-                   (ARM - tw2, BEAM_H / 2 + T), (ARM - tw2, BEAM_H / 2), (-half, BEAM_H / 2)]
-        else:
-            pts = rect(-half, -BEAM_H / 2, half, BEAM_H / 2)
-        holes = m3_ring()
-        holes.append(hole(0, 0, ROD_D + 0.4) if kind == "A" else hexagon(0, 0, NUT_AF))
-        holes.append(stadium(-CW_SLOT[1], -CW_SLOT[0], 0, CW_BOLT))
-        for u in (205, 150, 95):
-            holes.append(slot(u, 0, 3.5, 8))
-        if kind == "A":
-            holes.append(hole(-ARM, 0, HOOK_D))
-        return pts, holes
-
-    pa, ha = beam("A")
-    parts.append(Part("beam_A", "Beam centre ply", pa, ha, qty=1))
-    pb, hb = beam("B")
-    parts.append(Part("beam_B", "Beam outer ply (nut pocket)", pb, hb, qty=2))
-
-    # motor plate, plain
-    def plate(width, guard):
-        holes = [hole(sx * MOTOR_PATTERN / 2, sy * MOTOR_PATTERN / 2, M3_CLR)
-                 for sx in (-1, 1) for sy in (-1, 1)]
-        holes.append(slot(0, 0, MOUNT_TAB, T + SLOT_FIT))
-        holes.append(slot(0, 16, 12, 8))
-        if guard:
-            for sy in (-1, 1):
-                holes.append(slot(0, sy * GUARD_LEG_Y, 20, T + SLOT_FIT))
-        return rect(-MOUNT_PLATE / 2, -width / 2, MOUNT_PLATE / 2, width / 2), holes
-
-    o, h = plate(MOUNT_PLATE, False)
-    parts.append(Part("motor_plate", "Motor plate", o, h, qty=1))
-
-    # optional prop guard
-    o, h = plate(GUARD_PLATE_W, True)
-    parts.append(Part("motor_plate_guard", "Motor plate for guard (use instead of plain)", o, h,
-                      qty=1, optional=True))
-    ring_o = arc(0, 0, GUARD_OD / 2, 0, 360, 120)[:-1]
-    ring_h = [hole(0, 0, GUARD_ID)] + [slot(0, sy * GUARD_LEG_Y, 20, T + SLOT_FIT) for sy in (-1, 1)]
-    parts.append(Part("guard_ring", "Prop guard ring", ring_o, ring_h, qty=1, optional=True))
-    lt = (20 + KERF) / 2
-    leg = [(-12, 0), (-lt, 0), (-lt, -T), (lt, -T), (lt, 0), (12, 0), (12, LEG_H),
-           (lt, LEG_H), (lt, LEG_H + T), (-lt, LEG_H + T), (-lt, LEG_H), (-12, LEG_H)]
-    parts.append(Part("guard_leg", "Prop guard leg", leg, [], qty=2, optional=True))
+    # 5 bucket plate
+    bw, bh = BUCKET_PLATE
+    holes = []
+    for u in grid_cols():
+        for sy in (-1, 1):
+            for y in BUCKET_ROWS_Y:
+                holes.append(hole((ARM - GRID_C) + u, sy * y, HOLE_D))
+    parts.append(Part("bucket_plate", "Bucket plate (sits on top of the arm end)", rect(-bw / 2, -bh / 2, bw / 2, bh / 2), holes))
     return parts
+
+
+# ------------------------------------------------------------------ printed mount (viewer + scad)
+def mount_platform():
+    holes = []
+    for pat in MOTOR_PATTERNS:
+        pass
+    r0, r1 = MOTOR_PATTERNS[0] * math.sqrt(2) / 2, MOTOR_PATTERNS[-1] * math.sqrt(2) / 2
+    for a in (45, 135, 225, 315):
+        holes.append(radial_slot(MOTOR_X, 0, r0, r1, a, HOLE_D))
+    holes.append({"kind": "circle", "c": (MOTOR_X, 0), "d": CENTER_D})
+    holes.append(poly(rect(MOTOR_X - 18, -4, MOTOR_X, 4)))        # wire slot toward the arm
+    outline = rect(-MOUNT_SIDE_HALF, -MOUNT_PLAT_W / 2, PLAT_X1, MOUNT_PLAT_W / 2)
+    return outline, holes
+
+
+def mount_side():
+    top = MOUNT_GAP + MOUNT_PLAT_T
+    outline = rect(-MOUNT_SIDE_HALF, SIDE_Z0, MOUNT_SIDE_HALF, top)
+    holes = [{"kind": "circle", "c": (u, z - ARM_H / 2), "d": HOLE_D} for u in grid_cols() for z in grid_rows()]
+    return outline, holes
+
+
+def write_scad(path):
+    vals = [("ARM_T", T), ("ARM_H", ARM_H), ("CLR", MOUNT_CLR), ("WALL", MOUNT_WALL), ("GAP", MOUNT_GAP),
+            ("PLAT_T", MOUNT_PLAT_T), ("PLAT_W", MOUNT_PLAT_W), ("SIDE_HALF", MOUNT_SIDE_HALF),
+            ("SIDE_Z0", SIDE_Z0), ("PLAT_X1", PLAT_X1), ("MOTOR_X", MOTOR_X), ("HOLE_D", HOLE_D),
+            ("GRID_PITCH", GRID_PITCH), ("GRID_COLS", GRID_COLS), ("GRID_ROWS", GRID_ROWS),
+            ("PATTERN_A", MOTOR_PATTERNS[0]), ("PATTERN_B", MOTOR_PATTERNS[-1]), ("CENTER_D", CENTER_D)]
+    with open(path, "w") as f:
+        f.write("// Written by generate.py, do not edit. x along the arm (toward the motor), y across, z up,\n"
+                "// arm top surface at z = 0, grid centre at x = 0.\n")
+        for k, v in vals:
+            f.write("%s = %s;\n" % (k, fmt(float(v))))
 
 
 # ------------------------------------------------------------------ nesting
@@ -379,14 +368,14 @@ def mat(origin, a, b):
             origin[0], origin[1], origin[2], 1]
 
 
-def contour_json(p):
-    out = [[[round(x, 3), round(y, 3)] for x, y in p.outline]]
-    for hc in p.holes:
+def cont_json(outline, holes):
+    out = [[[round(x, 3), round(y, 3)] for x, y in outline]]
+    for hc in holes:
         if hc["kind"] == "circle":
             cx, cy = hc["c"]
             r = hc["d"] / 2
-            out.append([[round(cx + r * math.cos(2 * math.pi * i / 48), 3),
-                         round(cy + r * math.sin(2 * math.pi * i / 48), 3)] for i in range(48)])
+            out.append([[round(cx + r * math.cos(2 * math.pi * i / 32), 3),
+                         round(cy + r * math.sin(2 * math.pi * i / 32), 3)] for i in range(32)])
         else:
             out.append([[round(x, 3), round(y, 3)] for x, y in hc["pts"]])
     return out
@@ -397,126 +386,142 @@ def build_model(parts):
     X, Y, Z = (1, 0, 0), (0, 1, 0), (0, 0, 1)
     items = []
 
-    def plate(pid, name, label, grp, m, expl, variant=None):
-        p = P[name]
-        items.append({"id": pid, "type": "plate", "group": grp, "label": label,
-                      "thickness": T, "contours": contour_json(p), "matrix": m,
-                      "explode": expl, "material": "wood", "variant": variant})
+    def plate(pid, label, grp, m, expl, outline, holes, thick, material="wood"):
+        items.append({"id": pid, "type": "plate", "group": grp, "label": label, "thickness": thick,
+                      "contours": cont_json(outline, holes), "matrix": m, "explode": expl, "material": material})
 
-    for k in range(BASE_LAYERS):
-        plate("base%d" % k, "base", "Base layer %d (%.0f x %.0f x %.0f mm)" % (k + 1, BASE_L, BASE_W, T),
-              "static", mat((0, (2 * k + 1) * T / 2, 0), X, Z), [0, -50 + 40 * k, 0])
-    for s in (-1, 1):
-        plate("upright%d" % s, "upright", "Upright, 608ZZ press-fit seat %.2f mm" % (BEARING_OD - PRESS_FIT),
-              "static", mat((0, BASE_T, s * (G / 2 + T / 2)), X, Y), [0, 0, s * 90])
-    for i, zt in enumerate(TIE_Z):
-        plate("tie%d" % i, "tie", "Tie plate", "static", mat((0, BASE_T + zt, 0), Z, X), [0, 20 + 15 * i, 0])
-    for s in (-1, 1):
-        plate("post%d" % s, "post", "End stop post (+-%.0f deg)" % MAX_TILT,
-              "static", mat((s * POST_X, BASE_T, 0), Z, Y), [s * 40, 40, 0])
-    plate("beamA", "beam_A", "Beam centre ply (hook hole, motor tab)", "beam", mat((0, 0, 0), X, Y), [0, 70, 0])
-    for s in (-1, 1):
-        plate("beamB%d" % s, "beam_B", "Beam outer ply (M8 nut pocket)", "beam",
-              mat((0, 0, s * T), X, Y), [0, 70, s * 45])
-    plate("mplate", "motor_plate", "Motor plate, 16 x 16 M3", "beam",
-          mat((ARM, BEAM_H / 2 + T / 2, 0), X, Z), [0, 90, 0], "plain")
-    plate("mplateg", "motor_plate_guard", "Motor plate for guard", "beam",
-          mat((ARM, BEAM_H / 2 + T / 2, 0), X, Z), [0, 90, 0], "guard")
-    plate("gring", "guard_ring", "Prop guard ring (optional)", "beam",
-          mat((ARM, PLATE_TOP + PROP_PLANE, 0), X, Z), [0, 190, 0], "guard")
-    for s in (-1, 1):
-        plate("gleg%d" % s, "guard_leg", "Prop guard leg (optional)", "beam",
-              mat((ARM, PLATE_TOP, s * GUARD_LEG_Y), X, Y), [0, 130, s * 20], "guard")
-
-    def cyl(pid, label, grp, material, center, axis, r, h, segs=48, hollow=0.0, variant=None,
-            expl=(0, 0, 0), opacity=1.0, rbot=None):
+    def cyl(pid, label, grp, material, center, axis, r, h, segs=48, hollow=0.0, expl=(0, 0, 0),
+            opacity=1.0, rbot=None):
         items.append({"id": pid, "type": "cyl", "group": grp, "label": label, "material": material,
                       "center": list(center), "axis": axis, "r": r, "rbot": rbot if rbot is not None else r,
-                      "h": h, "segs": segs, "hollow": hollow, "variant": variant,
-                      "explode": list(expl), "opacity": opacity})
+                      "h": h, "segs": segs, "hollow": hollow, "explode": list(expl), "opacity": opacity})
 
-    zb = G / 2 + T - BEARING_W / 2    # bearing flush with the outer face
+    p = P["base"]
+    plate("base", "Base plate (%.0f x %.0f x %.0f mm)" % (BASE_L, BASE_W, T), "static",
+          mat((0, T / 2, 0), X, Z), [0, -30, 0], p.outline, p.holes, T)
+    for s, name in ((-1, "tower_left"), (1, "tower_right")):
+        p = P[name]
+        plate(name, "%s, 608ZZ press-fit seat %.2f mm" % (p.label, BEARING_OD - PRESS_FIT), "static",
+              mat((0, T, s * TOWER_Y), X, Y), [0, 0, s * 110], p.outline, p.holes, T)
+    p = P["arm"]
+    plate("arm", "Arm, 550 x 40 x 8 mm, M8 hole and 4 x 3 M3 grids", "beam",
+          mat((0, 0, 0), X, Y), [0, 60, 0], p.outline, p.holes, T)
+    p = P["bucket_plate"]
+    plate("bucket", "Bucket plate (bucket stands on it)", "beam",
+          mat((-ARM, ARM_H / 2 + T / 2, 0), X, Z), [0, 120, 0], p.outline, p.holes, T)
+    # printed motor mount: platform + two side plates
+    o, h = mount_platform()
+    plate("mount_plat", "Printed motor mount (platform, slotted 16/19 mm M3)", "beam",
+          mat((GRID_C, ARM_H / 2 + MOUNT_GAP + MOUNT_PLAT_T / 2, 0), X, Z), [0, 140, 0], o, h, MOUNT_PLAT_T, "print")
+    o, h = mount_side()
+    for s in (-1, 1):
+        plate("mount_side%d" % s, "Printed motor mount (side plate)", "beam",
+              mat((GRID_C, ARM_H / 2, s * (T / 2 + MOUNT_CLR + MOUNT_WALL / 2)), X, Y),
+              [0, 140, s * 40], o, h, MOUNT_WALL, "print")
+    # bearings (flush with the outer tower face)
+    zb = G / 2 + T - BEARING_W / 2
     for s in (-1, 1):
         cyl("bearing%d" % s, "608ZZ bearing", "static", "metal", (0, PIVOT_H, s * zb), "z",
             BEARING_OD / 2, BEARING_W, hollow=BEARING_ID / 2, expl=(0, 0, s * 150))
-        cyl("nut%d" % s, "M8 nut", "static", "metal", (0, PIVOT_H, s * (G / 2 + T + NUT_H / 2)), "z",
-            NUT_AF / math.sqrt(3), NUT_H, segs=6, hollow=ROD_D / 2, expl=(0, 0, s * 200))
-    cyl("rod", "M8 x %.0f rod" % ROD_LEN, "static", "metal", (0, PIVOT_H, 0), "z", ROD_D / 2, ROD_LEN,
-        expl=(0, 0, 0))
+    # bolt stack, in the beam frame (origin = pivot axis); z = lateral, left = -z
+    zo = G / 2 + T                      # outer tower face
+    zin = INNER_STACK / 2               # inner race face
+    hx = NUT_AF / math.sqrt(3)
+    z_head_under = -(zo + WASHER_T)
+    cyl("bolt", "M8 x %d full-thread bolt" % BOLT_LEN, "beam", "metal",
+        (0, 0, z_head_under + BOLT_LEN / 2), "z", BOLT_D / 2, BOLT_LEN, expl=(0, 0, 0))
+    cyl("head", "Bolt head", "beam", "metal", (0, 0, z_head_under - HEAD_H / 2), "z", hx, HEAD_H, segs=6,
+        expl=(0, 0, -260))
+    def ring(pid, label, z, h, r, segs, expl, hollow=BOLT_D / 2):
+        cyl(pid, label, "beam", "metal", (0, 0, z), "z", r, h, segs=segs, hollow=hollow, expl=(0, 0, expl))
+    ring("wash_out_l", "M8 washer (outside)", -(zo + WASHER_T / 2), WASHER_T, WASHER_OD / 2, 32, -200, 4.2)
+    ring("wash_out_r", "M8 washer (outside)", zo + WASHER_T / 2, WASHER_T, WASHER_OD / 2, 32, 200, 4.2)
+    ring("nut_out", "M8 nut (outside)", zo + WASHER_T + NUT_H / 2, NUT_H, hx, 6, 260)
+    for s in (-1, 1):
+        z = s * (zin - NUT_H / 2)
+        ring("spacer%d" % s, "M8 nut as spacer against the inner race", z, NUT_H, hx, 6, s * 110)
+        z = s * (zin - NUT_H - NUT_H / 2)
+        ring("clamp%d" % s, "M8 clamp nut", z, NUT_H, hx, 6, s * 70)
+        z = s * (zin - 2 * NUT_H - WASHER_T / 2)
+        ring("clampw%d" % s, "M8 clamp washer", z, WASHER_T, WASHER_OD / 2, 32, s * 35, 4.2)
+    # motor and prop (envelopes)
+    mx = GRID_C + MOTOR_X
     cyl("motor", "OpenMotor 2306 (envelope, size estimated)", "beam", "motor",
-        (ARM, PLATE_TOP + MOTOR_H / 2, 0), "y", MOTOR_D / 2, MOTOR_H, expl=(0, 130, 0))
+        (mx, PLAT_TOP + MOTOR_H / 2, 0), "y", MOTOR_D / 2, MOTOR_H, expl=(0, 200, 0))
     cyl("prop", "5 inch prop disc (%.0f mm)" % PROP_D, "beam", "prop",
-        (ARM, PLATE_TOP + PROP_PLANE, 0), "y", PROP_D / 2, 1.5, segs=96, expl=(0, 160, 0), opacity=0.25)
-    cyl("bucket", "Bucket (hangs from the hook)", "hang", "bucket", (0, -40, 0), "y",
-        55, 80, hollow=-1, expl=(0, -120, 0), rbot=42)
-    hp = stop_post_height()
-    return {
-        "params": {"ply": T, "kerf": KERF, "arm": ARM, "pivot_h": PIVOT_H, "max_tilt": MAX_TILT,
-                   "gap": G, "base_t": BASE_T, "beam_h": BEAM_H, "post_h": round(hp, 2),
-                   "hook": [-ARM, 0, 0]},
-        "items": items,
-    }
+        (mx, PLAT_TOP + PROP_PLANE, 0), "y", PROP_D / 2, 1.5, segs=96, expl=(0, 240, 0), opacity=0.25)
+    return {"params": {"ply": T, "kerf": KERF, "arm": ARM, "pivot_h": PIVOT_H, "travel": TRAVEL_DEG,
+                       "gap": round(G, 2), "bolt_len": BOLT_LEN}, "items": items}
 
 
 # ------------------------------------------------------------------ checks
+def tip_contact_deg():
+    lo, hi = 0.0, 80.0
+    tip = ARM + ARM_END
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        th = math.radians(mid)
+        if tip * math.sin(th) + ARM_H / 2 * math.cos(th) < PIVOT_H:
+            lo = mid
+        else:
+            hi = mid
+    return lo
+
+
 def checks(parts):
-    th = math.radians(MAX_TILT)
     P = {p.name: p for p in parts}
-    mass = lambda names: sum(P[n].area() * T * PLY_DENSITY / 1000.0 * P[n].qty for n in names)
-    m_static = mass(["base", "upright", "tie", "post"])
-    m_beam = mass(["beam_A", "beam_B", "motor_plate"])
+    th = math.radians(TRAVEL_DEG)
+    area_g = lambda n: P[n].area() * T * PLY_DENSITY / 1000.0
+    print("sheets: %d x %.0f x %.0f" % (len(SHEETS), SHEET_W, SHEET_H))
+    print("ply %.1f kerf %.2f; bearing seat actual %.2f (cut path %.2f); bearing recess %.1f mm"
+          % (T, KERF, BEARING_OD - PRESS_FIT, BEARING_OD - PRESS_FIT - KERF, T - BEARING_W))
+    print("tower gap G %.1f mm; inner stack %.1f mm (spacer nut, clamp nut, washer, arm, washer, clamp nut, spacer nut)"
+          % (G, INNER_STACK))
+    print("bolt: head underside to tip at least %.1f mm -> M8 x %d fully threaded" % (BOLT_LEN_MIN, BOLT_LEN))
+    tip = ARM + ARM_END
+    print("arm %.0f mm each side to axis/centre; pivot %.0f mm; plate length %.0f" % (ARM, PIVOT_H, 2 * tip))
+    drop = tip * math.sin(th) + ARM_H / 2 * math.cos(th)
+    print("arm tip height above table at %.0f deg: %.1f mm" % (TRAVEL_DEG, PIVOT_H - drop))
+    tc = tip_contact_deg()
+    print("arm tip reaches the table at %.1f deg (this is the travel limit, there are no stops)" % tc)
+    thc = math.radians(tc)
+    xb = BASE_L / 2
+    u = (xb + ARM_H / 2 * math.sin(thc)) / math.cos(thc)
+    print("arm underside height over the base edge at that tilt: %.0f mm (base top %.0f)"
+          % (PIVOT_H - (u * math.sin(thc) + ARM_H / 2 * math.cos(thc)), T))
+    pc = PIVOT_H - ARM * math.sin(th) + PLAT_TOP * math.cos(th) + PROP_PLANE * math.cos(th)
+    print("prop centre height with the motor end down at %.0f deg: %.0f mm; lowest blade edge %.0f mm"
+          % (TRAVEL_DEG, pc, pc - PROP_D / 2 * math.sin(th)))
+    xn = ARM * math.cos(th) - (PLAT_TOP + PROP_PLANE) * math.sin(th) - PROP_D / 2 * math.cos(th)
+    print("nearest prop disc edge to the pivot plane: %.0f mm; towers span +-%.0f mm" % (xn, TOWER_FOOT / 2))
+    m_plate = area_g("bucket_plate")
+    m_mount = 25.0
+    m_motor_end = 33.0 + m_mount + 5.0 + 2.0
+    print("end masses (estimates): bucket plate %.0f g at the bucket end; motor 33 + mount %.0f + prop 5 + screws 2 = %.0f g"
+          % (m_plate, m_mount, m_motor_end))
+    print("imbalance: %.0f g at %.0f mm (bucket end heavier if positive); plus the founder's bracket"
+          % (m_plate - m_motor_end, ARM))
     F = THRUST_G / 1000.0 * 9.81
-    Fs = F * ARM / POST_X                  # stop reaction with the motor end against its stop
-    Fp = Fs - F                            # uplift at the pivot
-    W = m_static / 1000.0 * 9.81
-    half = BASE_L / 2
-    over = Fp * half - Fs * (half - POST_X)
-    sf = W * half / over if over > 0 else float("inf")
-    print("sheets: %d x %.0f x %.0f (+%d optional)" % (len(SHEETS), SHEET_W, SHEET_H, len(OPT_SHEETS)))
-    print("ply thickness %.1f  kerf %.2f  gap between uprights %.1f  rod %.0f" % (T, KERF, G, ROD_LEN))
-    print("bearing seat cut path dia %.2f (actual %.2f)" % (BEARING_OD - PRESS_FIT - KERF, BEARING_OD - PRESS_FIT))
-    print("bearing %.1f mm in %.1f mm ply: recess %.1f mm" % (BEARING_W, T, T - BEARING_W))
-    print("hex pocket actual AF %.2f for %.1f nut, nut %.1f in %.1f pocket (recess %.1f)"
-          % (NUT_AF + HEX_CLR, NUT_AF, NUT_H, T, T - NUT_H))
-    print("arm %.0f mm both sides; pivot height %.0f mm; stop post height %.1f above base top" % (ARM, PIVOT_H, stop_post_height()))
-    drop = PIVOT_H - ARM * math.sin(th)
-    print("beam end / hook height at the stop: %.1f mm above table -> bucket may hang %.0f mm below the hook"
-          % (drop, drop - 10))
-    pc = PIVOT_H - ARM * math.sin(th) + (PLATE_TOP + PROP_PLANE) * math.cos(th)
-    print("prop centre height with the motor end at its lowest: %.0f mm; lowest blade edge %.0f mm above table"
-          % (pc, pc - PROP_D / 2 * math.sin(th)))
-    xn = ARM * math.cos(th) - (PLATE_TOP + PROP_PLANE) * math.sin(th) - PROP_D / 2 * math.cos(th)
-    print("nearest prop disc edge to the pivot plane (worst tilt): %.0f mm; uprights span +-%.0f mm at the base"
-          % (xn, UPRIGHT_BASE / 2))
-    print("mass estimate: static %.0f g, beam+plate %.0f g (ply %.2f g/cm3)" % (m_static, m_beam, PLY_DENSITY))
-    print("tip-over: stop reaction %.1f N at x=%.0f, pivot uplift %.1f N, jig weight %.1f N, base +-%.0f"
-          % (Fs, POST_X, Fp, W, half))
-    print("tip-over safety factor %s (stop posts inside the footprint: %s)"
-          % ("%.1f" % sf if sf != float("inf") else "inf", POST_X < half))
-    print("lifted mass at level = thrust; at full tilt the same thrust balances %.0f g (weight arm shrinks by cos)"
-          % (THRUST_G / math.cos(th)))
+    Fc = F * ARM / tip
+    print("thrust against the table at the tip: table %.1f N up, pivot %.1f N (beam on the bearings); "
+          "free case loads the pivot with the weight only" % (Fc, F - Fc))
+    print("balanced case: pivot load = thrust + payload weight, centred on the base (no overturning moment)")
 
 
 def main():
-    global BEARING_MOUNT, SHEETS, OPT_SHEETS
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--bearing", choices=("press", "printed"), default=BEARING_MOUNT)
-    a = ap.parse_args()
-    BEARING_MOUNT = a.bearing
+    global SHEETS
     here = os.path.dirname(os.path.abspath(__file__))
     cut, img, view = (os.path.join(here, d) for d in ("cut", "images", "viewer"))
     for d in (cut, img, view):
         os.makedirs(d, exist_ok=True)
-    for f in os.listdir(cut):
-        os.remove(os.path.join(cut, f))
+    for d in (cut, img):
+        for f in os.listdir(d):
+            os.remove(os.path.join(d, f))
     parts = make_parts()
-    SHEETS = nest([p for p in parts if not p.optional])
-    OPT_SHEETS = nest([p for p in parts if p.optional])
-    suffix = "" if BEARING_MOUNT == "press" else "-printed"
-    named = [("sheet-%d%s" % (i + 1, suffix), s) for i, s in enumerate(SHEETS)] + \
-            [("optional-%d%s" % (i + 1, suffix), s) for i, s in enumerate(OPT_SHEETS)]
+    SHEETS = nest(parts)
     png = shutil.which("rsvg-convert")
-    for name, s in named:
+    for i, s in enumerate(SHEETS):
+        name = "sheet-%d" % (i + 1)
         write_svg(os.path.join(cut, name + ".svg"), s)
         write_dxf(os.path.join(cut, name + ".dxf"), s)
         pv = os.path.join(img, name + ".svg")
@@ -524,11 +529,12 @@ def main():
         if png:
             subprocess.run([png, "-w", "1800", pv, "-o", os.path.join(img, name + ".png")], check=True)
         os.remove(pv)
-        print("wrote", name, ", ".join("%s" % p.name for p, _, _ in s))
+        print("wrote", name, ", ".join(p.name for p, _, _ in s))
     if not png:
         print("rsvg-convert not found: no PNG previews")
     with open(os.path.join(view, "model.json"), "w") as f:
         json.dump(build_model(parts), f, separators=(",", ":"))
+    write_scad(os.path.join(here, "motor_mount_params.scad"))
     checks(parts)
 
 

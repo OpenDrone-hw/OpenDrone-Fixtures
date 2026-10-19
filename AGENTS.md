@@ -14,7 +14,7 @@ before touching the fixture, and keep it correct when you do.
 | `OpenESC-20x20-Flashing/` | `20x20-ESC-Flashing.kicad_pro` | OpenESC-20x20 |
 | `OpenESC-30x30-QC/` | `30x30-ESC-QC.kicad_pro` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) |
 | `OpenESC-30x30-Flashing/` | `30x30-ESC-Flashing.kicad_pro` | OpenESC-30x30 |
-| `OpenMotor-Seesaw/` | none (no KiCad); `generate.py` writes laser-cut SVG/DXF, previews and `viewer/model.json` | [OpenMotor](https://github.com/OpenDrone-hw/OpenMotor) filming and demo jig |
+| `OpenMotor-Seesaw/` | none (no KiCad); `generate.py` writes laser-cut SVG/DXF, previews, `viewer/model.json`, `motor_mount_params.scad` | [OpenMotor](https://github.com/OpenDrone-hw/OpenMotor) filming and demo jig |
 
 Libraries are project-local in each directory (`*.kicad_sym`, `*.pretty/`,
 `*.3dshapes/`, declared in its `sym-lib-table` and `fp-lib-table`); the 20x20

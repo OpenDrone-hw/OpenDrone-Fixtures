@@ -1,12 +1,11 @@
 # OpenMotor-Seesaw
 
-Filming jig for the OpenMotor video: a balance beam on two 608ZZ bearings. One OpenMotor 2306 with a 5 inch prop sits on one end, blowing up, so its thrust pushes that end down. A bucket on the other end collects motors (about 33 g each). The shot: the bucket end lifts. At level, with the beam balanced empty, the motor lifts a bucket content mass equal to its thrust (measured max 1,711 g).
+Filming jig for the OpenMotor video: a plain balance arm on an M8 bolt running in two 608ZZ bearings. An OpenMotor 2306 with a 5 inch prop sits on one end blowing upward, so its thrust pushes that end down. A bucket stands on a plate on the other end. The shot: the bucket end lifts. Both lever arms are 250 mm, so at level the motor lifts a bucket load equal to its thrust (measured max 1,711 g).
 
-Everything is laser-cut 8 mm birch ply plus hardware. All dimensions come from the parameter block at the top of `generate.py`; change it and rerun.
+Five laser-cut 8 mm ply plates, one 3D-printed motor mount, standard hardware. All dimensions come from the parameter block at the top of `generate.py`.
 
 ```sh
-python3 generate.py                      # cut files, previews, viewer/model.json
-python3 generate.py --bearing printed    # variant with a printed bearing housing, see below
+python3 generate.py     # cut sheets (SVG, DXF), previews, viewer/model.json, motor_mount_params.scad
 ```
 
 ## 3D viewer
@@ -16,121 +15,147 @@ python3 -m http.server -d OpenMotor-Seesaw/viewer 8000    # from the repository 
 # open http://localhost:8000
 ```
 
-Orbit, tilt slider within the end stops, exploded view, optional prop guard, hover labels. three.js 0.160.0 is loaded from jsDelivr, so the page needs internet. The ply parts are extruded from the same contours that go to the laser (`viewer/model.json`, written by `generate.py`). Motor, prop disc and bucket are envelopes, not real geometry.
+Orbit, tilt slider, exploded view, hover labels. three.js 0.160.0 comes from jsDelivr, so the page needs internet. Ply parts are extruded from the exact cut contours (`viewer/model.json`, written by `generate.py`). Motor and prop disc are envelopes, the printed mount is drawn from its platform and side plate outlines (the OpenSCAD file is the real model).
 
 ## Layout
 
 ```
-        stop post                                  stop post
-           |                                           |
-   hook    |        beam (3 plies, 40 mm high)         |   motor plate
-  (o)======+====================(O)====================+====[motor]
-   |   counterweight slot     pivot (2 x 608ZZ, M8)     |    prop ~ 127 mm disc, blows UP
- bucket                          /\                     |
-   |                            /  \  A-frame uprights  |
- ==========================  base, 2 glued layers  ==============
-        arm = 250 mm                    arm = 250 mm
+       bucket plate on the arm end                    printed mount + motor, prop blows UP
+      +--------------+                                         (o) prop disc 127 mm
+ =====|==============|=========(O)=================================|====   arm, 8 mm plate on edge
+       <---- 250 ---->   pivot: M8 bolt in 2 x 608ZZ   <------- 250 ------>
+                          /\
+                         /  \   two tower plates in slots
+ ================== base plate, 300 x 220 =============
 ```
 
 ```mermaid
 flowchart LR
-  T["Thrust T, pushes motor end down"] --> M["Moment T x 250 mm"]
-  W["Bucket weight m g"] --> N["Moment m g x 250 mm x cos(tilt)"]
-  M --> C{"T > m g ?"}
-  N --> C
-  C -->|yes| L["Bucket end rises until its stop (20 deg)"]
+  T["Thrust T pushes the motor end down"] --> A["Moment T x 250 mm"]
+  W["Bucket load m g"] --> B["Moment m g x 250 mm x cos(tilt)"]
+  A --> C{"T greater than m g ?"}
+  B --> C
+  C -->|yes| L["Bucket end lifts"]
 ```
 
-## Dimensions (from `generate.py`, 8 mm ply)
+## The five plates (8 mm ply)
+
+| # | Part | Size | Features |
+|---|---|---|---|
+| 1 | Base plate | 300 x 220 | Two 120 mm slots for the tower tabs, four 6.5 mm corner clamp holes, ESC zip tie slots |
+| 2 | Tower, left | 160 foot, 190 + 22 mm | 120 mm tab, 608ZZ press-fit seat at the top |
+| 3 | Tower, right | same | same |
+| 4 | Arm | 550 x 40 | 8.3 mm bolt hole at the centre, a 4 x 3 grid of M3 holes at each end |
+| 5 | Bucket plate | 130 x 130 | Sits on top of the arm end, 4 x 4 grid of M3 holes (two blocks of 4 x 2 either side of the arm) |
+
+Hole grid: M3 clearance (3.4 mm), 10 mm pitch. Arm grid: 4 columns along the arm at 195, 205, 215, 225 mm from the pivot (both ends), 3 rows at 10 mm pitch centred on the arm height. Bucket plate grid: the same four columns, rows at 14 and 24 mm either side of the arm centreline, so a printed bracket can bolt to the arm face and to the plate. The bracket itself is not part of this directory.
+
+Printed part: `motor_mount.scad` (parameters in `motor_mount_params.scad`, generated). A saddle: two 4 mm side plates clamp the arm with 12 M3 screws through the arm grid, a platform floats 3 mm above the arm top and carries the motor 40 mm farther out, so the motor axis is at exactly 250 mm. Four slotted holes cover both 16 x 16 and 19 x 19 mm M3 patterns (slots on the diagonals from 11.3 to 13.4 mm radius), 14 mm centre hole for shaft and circlip, wire slot toward the arm. Not printed or test-fitted yet.
+
+## Dimensions
 
 | Item | Value |
 |---|---|
-| Arm, pivot to motor axis and pivot to hook | 250 mm each |
-| Pivot axis height above table | 250 mm |
-| Base | 420 x 240 mm, two glued 8 mm layers (16 mm) |
-| Uprights | two A-frame plates, 220 mm base, 30 mm gap between them |
-| End stops | posts at x = 190 mm, 143.6 mm tall above the base, beam stops at +-20 deg |
-| Beam | 544 x 40 mm centre ply plus two 456 x 40 mm outer plies, 24 mm total |
-| Hook | 10 mm hole in the centre ply at 250 mm, at pivot axis height |
-| Prop centre height | about 225 mm above the table with the motor end at its lowest stop (lowest blade edge about 203 mm), more elsewhere |
-| Prop to uprights | nearest prop disc edge at least 153 mm from the pivot plane at worst tilt; nothing of the jig is above the disc |
-| Bucket clearance | the hook is 164 mm above the table at its lowest, so the bucket may hang about 150 mm below the hook |
-| Jig mass | about 1.5 kg static plus 0.3 kg beam (estimate from ply area at 0.68 g/cm3) |
+| Arm, pivot to motor axis = pivot to bucket plate centre | 250 mm each |
+| Pivot axis height above table | 190 mm |
+| Tower spacing (inner faces) | 36.4 mm |
+| Prop | disc 127 mm, centre about 63 mm above the arm top edge; with the motor end down at 25 degrees the lowest blade edge is about 115 mm above the table, the nearest disc edge is 142 mm from the pivot plane (towers reach 80 mm) |
+| Estimated mass | about 1 kg ply, 26 g bucket end heavier before brackets (estimate) |
 
-Parameters worth knowing: `PLY_T` (8), `KERF` (0.15), `SLOT_FIT`, `PRESS_FIT` (0.10), `ARM`, `PIVOT_H`, `BEARING_*`, `ROD_*`. Kerf rule: holes are cut smaller, slots narrower, tabs wider by `KERF`; outer outlines are not offset. A 608ZZ seat is cut at 21.90 mm actual (path 21.75). The bearing is 7 mm in 8 mm ply, so it is recessed 1 mm on the inside face; press it flush with the outer face. Measure your ply (it is often 0.2 to 0.5 mm off nominal) and set `PLY_T`; cut one test slot and a test bearing seat first.
+Parameters: `PLY_T` (8), `KERF` (0.15), `ARM`, `PIVOT_H`, bearing and hardware dimensions, grid. Kerf rule: holes are cut smaller, slots narrower, tabs wider by `KERF`; outer outlines are not offset. The 608ZZ seat is 21.90 mm actual (cut path 21.75). The bearing is 7 mm in 8 mm ply, so it sits 1 mm recessed on the inner face; press it flush with the outer face. Measure your ply (often 0.2 to 0.5 mm off) and set `PLY_T`; cut a test seat and slot first.
 
-## Files
+## Travel limit
 
-| Path | What |
+There are no end stops. Only the arm tip limits travel: the lower tip corner reaches the table at about 39 degrees, and it has 56 mm of clearance at 25 degrees, the intended working range of roughly plus or minus 25 degrees. At that tilt the arm underside also clears the base edge. Nothing stops the arm before the table: do not run the motor with the bucket end unsupported. Because the bucket stands on the plate, it will slide off a plate tilted by 25 degrees unless the founder's bracket or the bucket shape holds it.
+
+## Pivot stack (one M8 bolt)
+
+The M8 bolt runs through both bearings and the arm. The arm is clamped to the bolt, so arm and bolt turn together inside the bearings. Left to right:
+
+| Item | Thickness mm |
 |---|---|
-| `generate.py` | Generator, parameters at the top, Python stdlib only |
-| `cut/sheet-1..3.svg/.dxf` | Required parts on three 600 x 400 mm sheets, red 0.01 mm hairline |
-| `cut/optional-1.svg/.dxf` | Prop guard parts (plate, ring, two legs) |
-| `images/*.png` | Labelled previews of each sheet (rendered with rsvg-convert) |
-| `viewer/` | Three.js viewer and `model.json` |
-| `bearing_housing.scad` | Printed bearing housing alternative, untested |
+| Bolt head (on the left inner race, outside the left tower) | 5.3 |
+| M8 washer (outside) | 1.6 |
+| Tower with 608ZZ (race flush with the outer face) | 8 |
+| M8 nut as spacer against the left inner race | 6.8 |
+| M8 clamp nut | 6.8 |
+| M8 washer | 1.6 |
+| Arm | 8 |
+| M8 washer | 1.6 |
+| M8 clamp nut | 6.8 |
+| M8 nut as spacer against the right inner race | 6.8 |
+| Tower with 608ZZ | 8 |
+| M8 washer (outside) | 1.6 |
+| M8 nut (outside) | 6.8 |
 
-Sheet contents: sheet 1 uprights, posts, beam centre ply, motor plate, tie plates; sheet 2 and 3 one base layer each, sheet 2 also the two outer beam plies. Cut `base` twice (one per sheet) and glue. The DXF is a plain R12 file with POLYLINE and CIRCLE entities on layer CUT, not opened in any CAD tool yet; use the SVGs if the DXF misbehaves.
+The inner stack is 38.4 mm; the towers are 36.4 mm apart (the races are recessed 1 mm in each tower). Required bolt: head underside to tip at least 62.4 + 3 mm thread protrusion = 65.4 mm, so an M8 x 70 bolt, fully threaded (ISO 4017 / DIN 933), because the clamp nuts sit in the middle of the shank. The spacers touch only the inner races, so the arm and the clamp stack cannot rub the towers.
+
+Clamp the arm first: tighten the two clamp nuts against the washers either side of the arm with thread locker, then jam each spacer nut against its clamp nut. Then fit the bearings and tighten the outer nut only until the stack is snug against both inner races. Do not squeeze the races hard. If the nut bottoms out too soon or the stack floats, trade a washer. The torque from 1.7 kg at 250 mm is about 4.2 N m through two washers' friction; that has not been tested, check by hand with a heavy bucket before filming and add a thread locker or a hex nut pocket if the arm slips.
+
+Check that the outside washers do not touch the bearing shields (the shield is usually slightly recessed); if they do, swap them for a nut.
 
 ## Bill of materials
 
 | Qty | Part |
 |---|---|
-| 3 sheets | 600 x 400 mm 8 mm birch ply (plus offcuts for the optional guard sheet) |
+| 2 sheets | 600 x 400 mm 8 mm birch ply (sheet 1: base, left tower, bucket plate; sheet 2: right tower, arm) |
 | 2 | 608ZZ bearing |
-| 1 | M8 x 80 full-thread bolt or threaded rod (steel) |
-| 4 | M8 nut (2 captured in the beam, 2 outside the bearings) |
-| 4 | M3 x 10 screw for the motor, check the motor's maximum screw depth |
-| 4 + 4 | M3 x 30 screw and nut, beam stack clamp (optional with glue) |
-| 1 | M5 x 35 bolt, 3 nuts and a few washers, counterweight |
-| 8 | 2.5 mm zip ties (wires on the beam, ESC on the base) |
-| 1 | S-hook or wire hook for the bucket |
-| 2 | Felt or rubber pads for the stop posts |
-| - | Wood glue, thread locker (for the captured nuts and the M8 outer nuts) |
-| 1 | Bucket (not included, any light bucket with a wire handle) |
+| 1 | M8 x 70 fully threaded bolt (steel) |
+| 6 | M8 nut (2 clamp, 2 spacer, 1 outside, 1 spare) |
+| 5 | M8 washer ISO 7089 (2 clamp, 2 outside, 1 spare) |
+| 4 | M3 x 10 screw for the motor (check the motor's maximum screw depth) |
+| 12 | M3 x 20 screw and nut for the printed mount |
+| 1 | 3D-printed motor mount (`motor_mount.scad`) |
+| - | Thread locker, wood glue, zip ties 2.5 mm |
+| 1 | Bucket and the founder's bracket (not included) |
 
 ## Assembly
 
-1. Dry-fit everything. Sand tabs if the ply is thicker than `PLY_T`.
-2. Glue the two base layers. Glue the uprights (tabs go through both layers) and stop posts into the base, then the two tie plates between the uprights. Check the uprights are square to the base.
-3. Glue the beam: centre ply (with the hook hole and the motor tab) between the two outer plies. The motor tab is on the end with no slot. The outer plies end 22 mm before the beam ends.
-4. Drop an M8 nut into each hex pocket from the outside, with thread locker, so each nut sits against the centre ply. Pass the M8 rod through both nuts and the centre ply hole, and lock it with thread locker. The rod must not turn in the beam: the pocket carries the torque, nothing else does. The nuts sit 1.2 mm below the ply face (pocket is 8 mm, nut is 6.8 mm); that is intended.
-5. Press the two 608ZZ into the upright seats from the outside, flush with the outer face. Use a vise or a nut-and-bolt press on the outer race only, never on the inner race.
-6. Slide the rod through both bearings (beam between the uprights) and snug an M8 nut on each end against the inner race only, with thread locker. The beam must float between the uprights with a few mm of clearance each side.
-7. Glue the motor plate onto the beam end (tab through the slot). Screw the motor on from below with M3 x 10. Fit the prop with the spin direction and thrust direction described below.
-8. Stick felt on the stop posts. Hang the bucket from the hook hole.
+1. Dry-fit the five plates. Sand the tab if ply is thicker than `PLY_T`.
+2. Press the two towers into the base slots (tab through the base), glue the tabs. Check both towers are square and parallel; a tab in a single slot resists leaning sideways only through the glue, so glue well.
+3. Press a 608ZZ into each tower seat from the outside, on the outer race only.
+4. Build the pivot as described above, then slide the bolt through the bearings with the arm between the towers.
+5. Bolt the printed mount to the arm end (12 M3 screws), screw the motor on from below with M3 x 10 and fit the prop.
+6. Place the bucket plate on top of the other arm end and fix it with the founder's bracket. Both ends use the same hole grid, so the two ends are interchangeable.
 
-Motor wires pass through the 12 x 8 mm slot beside the motor tab, run along the beam with the zip tie slots, and reach an ESC strapped to the base near the pivot (slot pairs on the base). Leave a slack loop at the pivot so the cables exert no torque on the beam; stiff cables are the biggest hidden error in this experiment.
+Route the motor wires along the arm with zip ties through spare grid holes to an ESC strapped to the base near the pivot (zip tie slots on the base). Leave a slack loop at the pivot: stiff cables add torque error in this experiment.
 
 ## Balancing
 
-The motor, plate, prop and wires are heavier than the empty bucket end. Balance with the final prop, wires and the empty bucket hung:
-
-1. Put the base on a flat table and let the beam swing free.
-2. Put an M5 bolt through the counterweight slot (115 to 215 mm from the pivot, bucket side) with nuts and washers.
-3. Move it outward to add moment, inward to reduce. The moment is mass x distance: a 40 g counterweight at 200 mm balances 32 g at the 250 mm motor end. Small corrections: washers or a strip of tape.
-4. The beam is balanced when it stays level where you leave it between the stops. A residual of about 1 to 3 g equivalent is likely bearing grease drag (an estimate, not measured); washing the bearings in isopropyl and relubricating thin reduces it.
-
-Do the trim again after anything is added to the motor end (guard ring, new wires). Trim to the empty bucket; the motors then go into the bucket, and the beam stays balanced when the bucket is empty.
+There is no counterweight slot. Estimated empty end masses: the bucket plate is about 91 g at the bucket end, the motor end is about 65 g (motor 33, printed mount about 25, prop 5, screws 2); all of these are estimates and the founder's bracket adds more. Weigh both ends and adjust: shorten or lighten the bucket plate (`BUCKET_PLATE`), or add washers on the light end through spare grid holes. The arm should stay level where you leave it with the bracket and empty bucket in place.
 
 ## The filming bet
 
-At level, the motor wins when its thrust is greater than the bucket content weight (equal arms, thrust perpendicular to the beam, so the moment is exactly T x 250 mm). The weight's moment shrinks by cos(tilt), so once the bucket moves, the same thrust balances about 1.8 kg at the 20 degree stop; the lift is decided at level. At 1,711 g thrust, the content mass to beat is less than 1.711 kg minus friction and cable stiffness: the margin is small, so stack motors until the bucket just stays down, then add the last one on camera. Use a known-mass scale for the bucket before the take.
+At level, the motor wins when its thrust exceeds the bucket load weight (equal arms, thrust perpendicular to the arm, so the moment is exactly T x 250 mm). The load's moment shrinks by cos(tilt), so after it starts moving it gets easier; the lift is decided at level. With 1,711 g thrust the load to beat is under 1.711 kg minus friction and cable stiffness: the margin is small. Weigh the bucket on a scale before the take.
 
-Open items before filming:
+## Flipped prop (read this)
 
-- Thrust direction. A normal prop on top of a motor pushes air down and the motor up. For air to go up with the prop above the motor you need a reverse-thrust setup (reversed spin plus a flipped or pusher prop). A normal prop spun in reverse usually gives clearly less than its forward thrust. Re-measure the thrust in the exact configuration used on the jig; the 1,711 g number is only valid if it was measured the same way.
-- The motor mount pattern is 16 x 16 mm M3 here. Not verified: it is not stated in the OpenMotor repository README. Check the motor before cutting the motor plate.
-- Motor height (31 mm), diameter (28 mm) and the prop plane height above the plate (36 mm) are estimates for the model and the prop guard leg height. Measure them.
+For the prop to blow up with the motor under it, the thrust on the motor must point down. A normal prop on top of a motor pushes air down. The plan is to flip the prop and reverse the motor direction in AM32, which gives reverse thrust; that is normally weaker than forward thrust. The 1,711 g figure is only valid if it was measured the same way. Re-measure the thrust with the exact flipped-prop setup on a scale before the shoot.
+
+## Safety
+
+Keep hands, face and loose items out of the prop disc and above it; wear eye protection, keep the motor disarmed until the area is clear, use a current-limited supply and a switch you can reach. Nothing of the jig is above or in the prop wash. The base is 300 x 220 x 8 mm and has four clamp holes; clamp it to the table if you expect bumps.
 
 ## Tip-over
 
-`generate.py` prints this check. The end stops are inside the base footprint (posts at 190 mm, base half-length 210 mm), so the stop load goes into the base, not past its edge. With the motor end hard against its stop the stop pushes down about 22 N and the pivot pulls up about 5 N: safety factor about 4.7 against tipping with the jig weight alone (estimate), static only. The base has four 6.5 mm holes at the corners; clamp it down with G-clamps or weigh it down if you want margin for bumps. The pivot uplift is carried by the glued tab joints of the uprights.
+`generate.py` prints this. In the balanced case the load (thrust plus payload plus weight) goes through the pivot, centred on the base, with no overturning moment. If the motor end is pushed down against the table, the table carries nearly all of the thrust (about 15 N of 16.8 N) and the towers see about 1.5 N. The arm never loads the base edge because the base is shorter than the arm. This is a static estimate; the towers are glued tab joints.
 
-## Prop guard (optional)
+## Files
 
-`optional-1` holds a wider motor plate (use it instead of the plain one), two legs and a ring (134 mm inside diameter, 5 mm clearance around a 127 mm prop). Glue legs into the plate, then the ring onto the legs. It adds roughly 50 g at the motor end (estimate), so rebalance. Without it, keep everything and everyone out of the prop disc and above it, wear eye protection, and keep the motor disarmed until the bucket is loaded and the area is clear. The prop wash goes up; nothing of the jig is in it. Use a current limited supply and a switch you can reach.
+| Path | What |
+|---|---|
+| `generate.py` | Generator, Python stdlib only |
+| `cut/sheet-1.svg`, `cut/sheet-2.svg` and `.dxf` | Cut files, red 0.01 mm hairline, 600 x 400 mm |
+| `images/sheet-*.png` | Labelled previews (rsvg-convert) |
+| `motor_mount.scad`, `motor_mount_params.scad` | Printed motor mount (second file is generated) |
+| `viewer/` | Three.js viewer and `model.json` |
 
-## Printed bearing housing (optional)
+The DXF is a plain R12 file (POLYLINE and CIRCLE on layer CUT), not opened in any CAD tool yet; use the SVGs if it misbehaves.
 
-`python3 generate.py --bearing printed` writes `*-printed` sheets with a 12 mm hole and four M3 holes on each upright instead of the press-fit seat. Print `bearing_housing.scad` twice, bolt one to the outside of each upright with M3 x 20, and use an M8 x 100 rod. Untested; the 3D viewer shows the press-fit design.
+## Unverified
+
+- The OpenMotor 2306 mounting pattern (16 x 16 or 19 x 19 M3) is not stated in the OpenMotor README; the slots cover both. The founder wrote "2605", taken to mean the 2306.
+- Motor height (31 mm), diameter (28 mm), the 14 mm centre hole and the prop plane height (36 mm) are estimates.
+- The printed mount, the pivot clamp torque and the tower rigidity are untested.
+- All masses are estimates.
+- Reverse thrust of the flipped prop is unknown.
