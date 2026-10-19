@@ -2,7 +2,7 @@
 
 Bench boards for the OpenESC line: a press-contact QC fixture and an ST-LINK
 pogo-pin SWD flashing station for each of OpenESC-20x20 and OpenESC-30x30.
-Four independent KiCad 10 projects, one per directory. Each directory's
+Four independent KiCad 10 projects, one per directory, plus one non-KiCad filming jig (`OpenMotor-Seesaw/`, its README is its brief). Each directory's
 README is that fixture's brief: contact geometry, parts, layout state. Read it
 before touching the fixture, and keep it correct when you do.
 
@@ -14,6 +14,7 @@ before touching the fixture, and keep it correct when you do.
 | `OpenESC-20x20-Flashing/` | `20x20-ESC-Flashing.kicad_pro` | OpenESC-20x20 |
 | `OpenESC-30x30-QC/` | `30x30-ESC-QC.kicad_pro` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) |
 | `OpenESC-30x30-Flashing/` | `30x30-ESC-Flashing.kicad_pro` | OpenESC-30x30 |
+| `OpenMotor-Seesaw/` | none (no KiCad); `generate.py` writes laser-cut SVG/DXF, previews and `viewer/model.json` | [OpenMotor](https://github.com/OpenDrone-hw/OpenMotor) filming and demo jig |
 
 Libraries are project-local in each directory (`*.kicad_sym`, `*.pretty/`,
 `*.3dshapes/`, declared in its `sym-lib-table` and `fp-lib-table`); the 20x20
