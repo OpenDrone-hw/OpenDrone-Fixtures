@@ -42,15 +42,15 @@ flowchart LR
 
 | # | Part | Size | Features |
 |---|---|---|---|
-| 1 | Base plate | 300 x 220 | Two 120 mm slots for the tower tabs, four 6.5 mm corner clamp holes, ESC zip tie slots |
+| 1 | Base plate | 300 x 220 | Two 120 mm slots for the tower tabs |
 | 2 | Tower, left | 160 foot, 190 + 22 mm | 120 mm tab, 608ZZ press-fit seat at the top |
 | 3 | Tower, right | same | same |
-| 4 | Arm | 550 x 40 | 8.3 mm bolt hole at the centre, a 4 x 3 grid of M3 holes at each end |
-| 5 | Bucket plate | 130 x 130 | Sits on top of the arm end, 4 x 4 grid of M3 holes (two blocks of 4 x 2 either side of the arm) |
+| 4 | Arm | 550 x 40 | 8.3 mm bolt hole at the centre |
+| 5 | Bucket plate | 130 x 130 | Sits on top of the arm end, no holes |
 
-Hole grid: M3 clearance (3.4 mm), 10 mm pitch. Arm grid: 4 columns along the arm at 195, 205, 215, 225 mm from the pivot (both ends), 3 rows at 10 mm pitch centred on the arm height. Bucket plate grid: the same four columns, rows at 14 and 24 mm either side of the arm centreline, so a printed bracket can bolt to the arm face and to the plate. The bracket itself is not part of this directory.
+No mounting holes: the founder adds his own (2026-10-19). The only holes cut are the two 608ZZ seats and the M8 hole in the arm; the base has only the two tower slots.
 
-Printed part: `motor_mount.scad` (parameters in `motor_mount_params.scad`, generated). A saddle: two 4 mm side plates clamp the arm with 12 M3 screws through the arm grid, a platform floats 3 mm above the arm top and carries the motor 40 mm farther out, so the motor axis is at exactly 250 mm. Four slotted holes cover both 16 x 16 and 19 x 19 mm M3 patterns (slots on the diagonals from 11.3 to 13.4 mm radius), 14 mm centre hole for shaft and circlip, wire slot toward the arm. Not printed or test-fitted yet.
+Printed part: `motor_mount.scad` (parameters in `motor_mount_params.scad`, generated). A saddle: two 4 mm side plates clamp the arm end with 12 M3 screws (drill matching holes in the arm through the side plates), a platform floats 3 mm above the arm top and carries the motor 40 mm farther out, so the motor axis is at exactly 250 mm. Four slotted holes cover both 16 x 16 and 19 x 19 mm M3 patterns (slots on the diagonals from 11.3 to 13.4 mm radius), 14 mm centre hole for shaft and circlip, wire slot toward the arm. Not printed or test-fitted yet.
 
 ## Dimensions
 
@@ -115,14 +115,14 @@ Check that the outside washers do not touch the bearing shields (the shield is u
 2. Press the two towers into the base slots (tab through the base), glue the tabs. Check both towers are square and parallel; a tab in a single slot resists leaning sideways only through the glue, so glue well.
 3. Press a 608ZZ into each tower seat from the outside, on the outer race only.
 4. Build the pivot as described above, then slide the bolt through the bearings with the arm between the towers.
-5. Bolt the printed mount to the arm end (12 M3 screws), screw the motor on from below with M3 x 10 and fit the prop.
-6. Place the bucket plate on top of the other arm end and fix it with the founder's bracket. Both ends use the same hole grid, so the two ends are interchangeable.
+5. Fit the printed mount on the arm end, drill the arm through its side-plate holes, bolt it with 12 M3 screws, screw the motor on from below with M3 x 10 and fit the prop.
+6. Place the bucket plate on top of the other arm end and fix it with the founder's bracket and his own holes.
 
-Route the motor wires along the arm with zip ties through spare grid holes to an ESC strapped to the base near the pivot (zip tie slots on the base). Leave a slack loop at the pivot: stiff cables add torque error in this experiment.
+Route the motor wires along the arm to an ESC fixed near the pivot. Leave a slack loop at the pivot: stiff cables add torque error in this experiment.
 
 ## Balancing
 
-There is no counterweight slot. Estimated empty end masses: the bucket plate is about 91 g at the bucket end, the motor end is about 65 g (motor 33, printed mount about 25, prop 5, screws 2); all of these are estimates and the founder's bracket adds more. Weigh both ends and adjust: shorten or lighten the bucket plate (`BUCKET_PLATE`), or add washers on the light end through spare grid holes. The arm should stay level where you leave it with the bracket and empty bucket in place.
+There is no counterweight slot. Estimated empty end masses: the bucket plate is about 91 g at the bucket end, the motor end is about 65 g (motor 33, printed mount about 25, prop 5, screws 2); all of these are estimates and the founder's bracket adds more. Weigh both ends and adjust: shorten or lighten the bucket plate (`BUCKET_PLATE`), or add washers on the light end. The arm should stay level where you leave it with the bracket and empty bucket in place.
 
 ## The filming bet
 
@@ -134,7 +134,7 @@ For the prop to blow up with the motor under it, the thrust on the motor must po
 
 ## Safety
 
-Keep hands, face and loose items out of the prop disc and above it; wear eye protection, keep the motor disarmed until the area is clear, use a current-limited supply and a switch you can reach. Nothing of the jig is above or in the prop wash. The base is 300 x 220 x 8 mm and has four clamp holes; clamp it to the table if you expect bumps.
+Keep hands, face and loose items out of the prop disc and above it; wear eye protection, keep the motor disarmed until the area is clear, use a current-limited supply and a switch you can reach. Nothing of the jig is above or in the prop wash. The base is 300 x 220 x 8 mm; clamp it to the table if you expect bumps.
 
 ## Tip-over
 
