@@ -3,7 +3,8 @@
 
 Five 8 mm ply plates (base, two towers, arm, bucket plate) plus one printed
 motor mount (motor_mount.scad). Writes, next to this script:
-  cut/sheet-N.svg / .dxf     cut files, red 0.01 mm hairline, 600 x 400 mm sheets
+  cut/sheet-N.svg            cut sheets, red 0.01 mm hairline, 600 x 400 mm
+  cut/<part>.dxf             one DXF per part, at the origin, units mm
   images/sheet-N.png         labelled preview (only if rsvg-convert exists)
   viewer/model.json          exact cut contours + assembly, read by viewer/index.html
   motor_mount_params.scad    numbers shared with motor_mount.scad
@@ -326,18 +327,20 @@ def write_svg(path, sheet, preview=False):
         f.write("\n".join(L) + "\n")
 
 
-def write_dxf(path, sheet):
-    E = ["0", "SECTION", "2", "ENTITIES"]
+def write_dxf(path, sheet, height=None):
+    height = SHEET_H if height is None else height
+    E = ["0", "SECTION", "2", "HEADER", "9", "$INSUNITS", "70", "4", "0", "ENDSEC",   # 4 = millimetres
+         "0", "SECTION", "2", "ENTITIES"]
     for p, ox, oy in sheet:
         for c in contours_for(p, ox, oy):
             if c[0] == "poly":
                 E += ["0", "POLYLINE", "8", "CUT", "66", "1", "70", "1"]
                 for a, b in c[1]:
-                    E += ["0", "VERTEX", "8", "CUT", "10", fmt(a), "20", fmt(SHEET_H - b), "30", "0"]
+                    E += ["0", "VERTEX", "8", "CUT", "10", fmt(a), "20", fmt(height - b), "30", "0"]
                 E += ["0", "SEQEND", "8", "CUT"]
             else:
                 (cx, cy), dd = c[1], c[2]
-                E += ["0", "CIRCLE", "8", "CUT", "10", fmt(cx), "20", fmt(SHEET_H - cy), "30", "0", "40", fmt(dd / 2)]
+                E += ["0", "CIRCLE", "8", "CUT", "10", fmt(cx), "20", fmt(height - cy), "30", "0", "40", fmt(dd / 2)]
     E += ["0", "ENDSEC", "0", "EOF"]
     with open(path, "w") as f:
         f.write("\n".join(E) + "\n")
@@ -509,13 +512,15 @@ def main():
     for i, s in enumerate(SHEETS):
         name = "sheet-%d" % (i + 1)
         write_svg(os.path.join(cut, name + ".svg"), s)
-        write_dxf(os.path.join(cut, name + ".dxf"), s)
         pv = os.path.join(img, name + ".svg")
         write_svg(pv, s, preview=True)
         if png:
             subprocess.run([png, "-w", "1800", pv, "-o", os.path.join(img, name + ".png")], check=True)
         os.remove(pv)
         print("wrote", name, ", ".join(p.name for p, _, _ in s))
+    for p in parts:
+        write_dxf(os.path.join(cut, p.name + ".dxf"), [(p, 0, 0)], height=p.h)   # one part per file, at the origin
+        print("wrote %s.dxf (%.0f x %.0f mm)" % (p.name, p.w, p.h))
     if not png:
         print("rsvg-convert not found: no PNG previews")
     with open(os.path.join(view, "model.json"), "w") as f:

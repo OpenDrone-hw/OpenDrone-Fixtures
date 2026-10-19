@@ -5,7 +5,7 @@ Filming jig for the OpenMotor video: a plain balance arm on an M8 bolt running i
 Five laser-cut 8 mm ply plates, one 3D-printed motor mount, standard hardware. All dimensions come from the parameter block at the top of `generate.py`.
 
 ```sh
-python3 generate.py     # cut sheets (SVG, DXF), previews, viewer/model.json, motor_mount_params.scad
+python3 generate.py     # cut sheets (SVG), one DXF per part, previews, viewer/model.json, motor_mount_params.scad
 ```
 
 ## 3D viewer
@@ -145,12 +145,13 @@ Keep hands, face and loose items out of the prop disc and above it; wear eye pro
 | Path | What |
 |---|---|
 | `generate.py` | Generator, Python stdlib only |
-| `cut/sheet-1.svg`, `cut/sheet-2.svg` and `.dxf` | Cut files, red 0.01 mm hairline, 600 x 400 mm |
+| `cut/sheet-1.svg`, `cut/sheet-2.svg` | Cut sheets, red 0.01 mm hairline, 600 x 400 mm |
+| `cut/base.dxf`, `tower_left.dxf`, `tower_right.dxf`, `arm.dxf`, `bucket_plate.dxf` | One DXF per part, placed at the origin, units mm |
 | `images/sheet-*.png` | Labelled previews (rsvg-convert) |
 | `motor_mount.scad`, `motor_mount_params.scad` | Printed motor mount (second file is generated) |
 | `viewer/` | Three.js viewer and `model.json` |
 
-The DXF is a plain R12 file (POLYLINE and CIRCLE on layer CUT), not opened in any CAD tool yet; use the SVGs if it misbehaves.
+The DXFs are plain R12 files (POLYLINE and CIRCLE on layer CUT, $INSUNITS set to mm), not opened in any CAD tool yet; use the SVGs if one misbehaves.
 
 ## Unverified
 
