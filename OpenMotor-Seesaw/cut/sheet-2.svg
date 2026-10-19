@@ -6,30 +6,6 @@
 </g>
 <g id="arm-1" fill="none" fill-rule="evenodd" stroke="#ff0000" stroke-width="0.01">
 <circle cx="280" cy="241" r="4.075" fill="none"/>
-<circle cx="55" cy="251" r="1.625" fill="none"/>
-<circle cx="55" cy="241" r="1.625" fill="none"/>
-<circle cx="55" cy="231" r="1.625" fill="none"/>
-<circle cx="65" cy="251" r="1.625" fill="none"/>
-<circle cx="65" cy="241" r="1.625" fill="none"/>
-<circle cx="65" cy="231" r="1.625" fill="none"/>
-<circle cx="75" cy="251" r="1.625" fill="none"/>
-<circle cx="75" cy="241" r="1.625" fill="none"/>
-<circle cx="75" cy="231" r="1.625" fill="none"/>
-<circle cx="85" cy="251" r="1.625" fill="none"/>
-<circle cx="85" cy="241" r="1.625" fill="none"/>
-<circle cx="85" cy="231" r="1.625" fill="none"/>
-<circle cx="475" cy="251" r="1.625" fill="none"/>
-<circle cx="475" cy="241" r="1.625" fill="none"/>
-<circle cx="475" cy="231" r="1.625" fill="none"/>
-<circle cx="485" cy="251" r="1.625" fill="none"/>
-<circle cx="485" cy="241" r="1.625" fill="none"/>
-<circle cx="485" cy="231" r="1.625" fill="none"/>
-<circle cx="495" cy="251" r="1.625" fill="none"/>
-<circle cx="495" cy="241" r="1.625" fill="none"/>
-<circle cx="495" cy="231" r="1.625" fill="none"/>
-<circle cx="505" cy="251" r="1.625" fill="none"/>
-<circle cx="505" cy="241" r="1.625" fill="none"/>
-<circle cx="505" cy="231" r="1.625" fill="none"/>
 <path d="M5 261 L555 261 L555 221 L5 221 Z" fill="none"/>
 </g>
 </svg>

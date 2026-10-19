@@ -178,12 +178,6 @@ def make_parts():
     parts = []
     # 1 base
     holes = [slot(0, sy * TOWER_Y, TOWER_TAB, T + SLOT_FIT) for sy in (-1, 1)]
-    for sx in (-1, 1):
-        for sy in (-1, 1):
-            holes.append(hole(sx * (BASE_L / 2 - 15), sy * (BASE_W / 2 - 20), 6.5))   # clamp holes
-    for x in (-20, 20):
-        for y in (50, 85):
-            holes.append(slot(x, y, 12, 3.5))                                          # ESC zip ties
     parts.append(Part("base", "Base plate", rrect(0, 0, BASE_L, BASE_W, 12), holes))
 
     # 2, 3 towers
@@ -200,19 +194,11 @@ def make_parts():
     # 4 arm
     half = ARM + ARM_END
     holes = [hole(0, 0, BOLT_D + ARM_HOLE_CLR)]
-    for s in (-1, 1):
-        for u in grid_cols():
-            for z in grid_rows():
-                holes.append(hole(s * GRID_C + u, z, HOLE_D))
     parts.append(Part("arm", "Arm (single plate on edge)", rect(-half, -ARM_H / 2, half, ARM_H / 2), holes))
 
     # 5 bucket plate
     bw, bh = BUCKET_PLATE
     holes = []
-    for u in grid_cols():
-        for sy in (-1, 1):
-            for y in BUCKET_ROWS_Y:
-                holes.append(hole((ARM - GRID_C) + u, sy * y, HOLE_D))
     parts.append(Part("bucket_plate", "Bucket plate (sits on top of the arm end)", rect(-bw / 2, -bh / 2, bw / 2, bh / 2), holes))
     return parts
 
@@ -404,7 +390,7 @@ def build_model(parts):
         plate(name, "%s, 608ZZ press-fit seat %.2f mm" % (p.label, BEARING_OD - PRESS_FIT), "static",
               mat((0, T, s * TOWER_Y), X, Y), [0, 0, s * 110], p.outline, p.holes, T)
     p = P["arm"]
-    plate("arm", "Arm, 550 x 40 x 8 mm, M8 hole and 4 x 3 M3 grids", "beam",
+    plate("arm", "Arm, 550 x 40 x 8 mm, M8 hole", "beam",
           mat((0, 0, 0), X, Y), [0, 60, 0], p.outline, p.holes, T)
     p = P["bucket_plate"]
     plate("bucket", "Bucket plate (bucket stands on it)", "beam",
