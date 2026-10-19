@@ -2,9 +2,11 @@
 
 Bench boards for the OpenESC line: a press-contact QC fixture and an ST-LINK
 pogo-pin SWD flashing station for each of OpenESC-20x20 and OpenESC-30x30.
-Four independent KiCad 10 projects, one per directory, plus one non-KiCad filming jig (`OpenMotor-Seesaw/`, its README is its brief). Each directory's
+Four independent KiCad 10 projects, one per directory. Each directory's
 README is that fixture's brief: contact geometry, parts, layout state. Read it
 before touching the fixture, and keep it correct when you do.
+
+`OpenMotor-Seesaw/` is the one non-KiCad directory: a filming jig for OpenMotor; its README is its brief.
 
 ## Repo
 
