@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="114mm" height="114mm" viewBox="0 0 114 114">
+<!-- Bottom pogo plate: spring pins up into the ESC's contact face; dowels locate the board. Red: cut. Blue: engrave. Units mm. -->
+<g fill="none" stroke="#ff0000" stroke-width="0.1">
+<polygon points="2,112 112,112 112,2 2,2"/>
+<circle cx="12" cy="102" r="4.05"/>
+<circle cx="12" cy="12" r="4.05"/>
+<circle cx="102" cy="102" r="4.05"/>
+<circle cx="102" cy="12" r="4.05"/>
+<circle cx="57" cy="12" r="2.15"/>
+<circle cx="57" cy="102" r="2.15"/>
+<circle cx="102" cy="57" r="2.15"/>
+<circle cx="12" cy="57" r="2.15"/>
+<circle cx="66.8" cy="72.7" r="1"/>
+<circle cx="60.8" cy="72.7" r="1"/>
+<circle cx="53.2" cy="72.7" r="1"/>
+<circle cx="47.2" cy="72.7" r="1"/>
+<circle cx="62.25" cy="39.5" r="0.85"/>
+<circle cx="60.75" cy="41.5" r="0.85"/>
+<circle cx="59.25" cy="39.5" r="0.85"/>
+<circle cx="56.25" cy="41.5" r="0.85"/>
+<circle cx="54.75" cy="39.5" r="0.85"/>
+<circle cx="53.25" cy="41.5" r="0.85"/>
+<circle cx="51.75" cy="39.5" r="0.85"/>
+<circle cx="72.261" cy="47.55" r="1"/>
+<circle cx="72.261" cy="51.05" r="1"/>
+<circle cx="72.261" cy="54.55" r="1"/>
+<circle cx="72.261" cy="58.05" r="1"/>
+<circle cx="72.261" cy="61.55" r="1"/>
+<circle cx="72.261" cy="65.05" r="1"/>
+<circle cx="41.739" cy="47.55" r="1"/>
+<circle cx="41.739" cy="51.05" r="1"/>
+<circle cx="41.739" cy="54.55" r="1"/>
+<circle cx="41.739" cy="58.05" r="1"/>
+<circle cx="41.739" cy="61.55" r="1"/>
+<circle cx="41.739" cy="65.05" r="1"/>
+<circle cx="67" cy="46.3" r="1.4"/>
+<circle cx="67" cy="66.3" r="1.4"/>
+<circle cx="47" cy="46.3" r="1.4"/>
+<circle cx="47" cy="66.3" r="1.4"/>
+</g><g fill="#0000ff" font-family="sans-serif">
+<text x="28" y="10" font-size="3">ESC-20 pogo</text>
+<text x="28" y="108" font-size="2.2">OpenESC-20x20 rev3.3 src 65b5bba5 t=8 mm, view from above</text>
+</g></svg>

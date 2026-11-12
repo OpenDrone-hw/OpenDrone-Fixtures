@@ -1,0 +1,36 @@
+plate,kind,ref,net,pin,x_mm,y_mm,hole_mm
+pogo,power,U pad 1,/CSA+,standard,9.8,-15.7,2
+pogo,power,U pad 1,/CSA+,standard,3.8,-15.7,2
+pogo,power,U pad 2,GND,long (GND first),-3.8,-15.7,2
+pogo,power,U pad 2,GND,long (GND first),-9.8,-15.7,2
+pogo,signal,U pad 3,+BATT,standard,5.25,17.5,1.7
+pogo,signal,U pad 4,GND,long (GND first),3.75,15.5,1.7
+pogo,signal,U pad 5,/CURR,standard,2.25,17.5,1.7
+pogo,signal,U pad 7,/M1,standard,-0.75,15.5,1.7
+pogo,signal,U pad 8,/M2,standard,-2.25,17.5,1.7
+pogo,signal,U pad 9,/M3,standard,-3.75,15.5,1.7
+pogo,signal,U pad 10,/M4,standard,-5.25,17.5,1.7
+pogo,phase,U pad 12,/ESC4/MotorA,standard,15.261,9.45,2
+pogo,phase,U pad 13,/ESC4/MotorB,standard,15.261,5.95,2
+pogo,phase,U pad 14,/ESC4/MotorC,standard,15.261,2.45,2
+pogo,phase,U pad 15,/ESC3/MotorB,standard,15.261,-1.05,2
+pogo,phase,U pad 16,/ESC3/MotorC,standard,15.261,-4.55,2
+pogo,phase,U pad 17,/ESC3/MotorA,standard,15.261,-8.05,2
+pogo,phase,U pad 18,/ESC2/MotorA,standard,-15.261,9.45,2
+pogo,phase,U pad 19,/ESC2/MotorC,standard,-15.261,5.95,2
+pogo,phase,U pad 20,/ESC2/MotorB,standard,-15.261,2.45,2
+pogo,phase,U pad 21,/ESC1/MotorC,standard,-15.261,-1.05,2
+pogo,phase,U pad 22,/ESC1/MotorB,standard,-15.261,-4.55,2
+pogo,phase,U pad 23,/ESC1/MotorA,standard,-15.261,-8.05,2
+pogo,dowel,mount hole,GND,dowel 2.8 + stop spacer,10,10.7,2.8
+pogo,dowel,mount hole,GND,dowel 2.8 + stop spacer,10,-9.3,2.8
+pogo,dowel,mount hole,GND,dowel 2.8 + stop spacer,-10,10.7,2.8
+pogo,dowel,mount hole,GND,dowel 2.8 + stop spacer,-10,-9.3,2.8
+press,swd,TP1,SWD,standard,-7.4,-5,1.7
+press,swd,TP2,SWD,standard,-6.2,3.3,1.7
+press,swd,TP3,SWD,standard,-4,3.3,1.7
+press,swd,TP4,SWD,standard,-5.2,-5,1.7
+press,swd,TP5,SWD,standard,6.1,-1.85,1.7
+press,swd,TP6,SWD,standard,3.9,-1.85,1.7
+press,swd,TP7,SWD,standard,7.5,6.4,1.7
+press,swd,TP8,SWD,standard,5.3,6.4,1.7

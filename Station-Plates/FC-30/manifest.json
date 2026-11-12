@@ -1,0 +1,83 @@
+{
+ "board_bbox_mm": [
+  38.342,
+  38.342
+ ],
+ "generated_by": "Station-Plates/generate.py",
+ "min_web_mm": {},
+ "params": {
+  "bushing_d": 15.0,
+  "dowel_clear": 1.0,
+  "dowel_under": 0.2,
+  "fc_ledge": 1.0,
+  "fc_part_clear": 0.5,
+  "fc_slot_gap": 20.0,
+  "fc_slots": 2,
+  "fc_stand_d": 3.2,
+  "fc_usb_notch_w": 13.0,
+  "kerf": 0.0,
+  "margin": 30.0,
+  "min_web": 0.4,
+  "phase_hole": 2.0,
+  "plate_min": 110.0,
+  "pocket_clearance": 0.15,
+  "power_hole": 2.0,
+  "power_pins_per_pad": 2,
+  "rod_d": 8.0,
+  "rod_inset": 10.0,
+  "signal_hole": 1.7,
+  "stack_screw_d": 4.3,
+  "stack_screw_inset": 10.0,
+  "swd_hole": 1.7,
+  "wire_window": 6.0
+ },
+ "plates": [
+  {
+   "name": "base",
+   "note": "Base: flat, rubber feet; support and nest plates screw on at the corners",
+   "size_mm": [
+    110.0,
+    156.684658
+   ],
+   "thickness_mm": 8
+  },
+  {
+   "name": "support",
+   "note": "Support: ledge under the board edge, window clears bottom-side parts and the USB plug",
+   "size_mm": [
+    110.0,
+    156.684658
+   ],
+   "thickness_mm": 3
+  },
+  {
+   "name": "nest",
+   "note": "Nest: board pocket, keeps both boards still for the gyro checks",
+   "size_mm": [
+    110.0,
+    156.684658
+   ],
+   "thickness_mm": 3
+  },
+  {
+   "name": "cable-bar",
+   "note": "Cable clamp bar: screws over the USB and ESC cables",
+   "size_mm": [
+    156.684658,
+    16.0
+   ],
+   "thickness_mm": 8
+  }
+ ],
+ "positions_csv": "boards/OpenFC-Lite/rev3.3/OpenFC-Lite-rev3.3_positions.csv",
+ "revision": "rev3.3",
+ "sku": "OpenFC-Lite",
+ "source": {
+  "commit": "b8b47908645b700d5274c0bdd668a422987001c2",
+  "dirty": false,
+  "path": "hardware/OpenFC.kicad_pcb",
+  "repository": "OpenDrone/hardware/OpenFC-Lite"
+ },
+ "station": "FC-30",
+ "tp_csv_vs_board_mm": 0.0
+}

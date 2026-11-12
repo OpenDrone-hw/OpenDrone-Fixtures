@@ -1,0 +1,98 @@
+{
+ "board_bbox_mm": [
+  42.021,
+  42.9
+ ],
+ "generated_by": "Station-Plates/generate.py",
+ "min_web_mm": {
+  "pogo": {
+   "between": [
+    "signal +BATT",
+    "signal GND"
+   ],
+   "web": 0.8
+  },
+  "press": {
+   "between": [
+    "SWD TP1",
+    "SWD TP4"
+   ],
+   "web": 0.84
+  }
+ },
+ "params": {
+  "bushing_d": 15.0,
+  "dowel_clear": 1.0,
+  "dowel_under": 0.2,
+  "fc_ledge": 1.0,
+  "fc_part_clear": 0.5,
+  "fc_slot_gap": 20.0,
+  "fc_slots": 2,
+  "fc_stand_d": 3.2,
+  "fc_usb_notch_w": 13.0,
+  "kerf": 0.0,
+  "margin": 30.0,
+  "min_web": 0.4,
+  "phase_hole": 2.0,
+  "plate_min": 110.0,
+  "pocket_clearance": 0.15,
+  "power_hole": 2.0,
+  "power_pins_per_pad": 2,
+  "rod_d": 8.0,
+  "rod_inset": 10.0,
+  "signal_hole": 1.7,
+  "stack_screw_d": 4.3,
+  "stack_screw_inset": 10.0,
+  "swd_hole": 1.7,
+  "wire_window": 6.0
+ },
+ "plates": [
+  {
+   "name": "base",
+   "note": "Base: holds the guide rods (press fit), window for the pogo wire tails",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 8
+  },
+  {
+   "name": "pogo",
+   "note": "Bottom pogo plate: spring pins up into the ESC's contact face; dowels locate the board",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 8
+  },
+  {
+   "name": "nest",
+   "note": "Nest: board pocket, loading guide; thickness = stop spacer + 1 mm (see README)",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 3
+  },
+  {
+   "name": "press",
+   "note": "Press plate: rides on bushings, carries the SWD pogo pins onto the MCU face",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 8
+  }
+ ],
+ "positions_csv": "boards/OpenESC-30x30/rev3.3/OpenESC-30x30-rev3.3_positions.csv",
+ "revision": "rev3.3",
+ "sku": "OpenESC-30x30",
+ "source": {
+  "commit": "d5994feb9f41ab15a6026ea8c63f8e6195687347",
+  "dirty": false,
+  "path": "hardware/4in1.kicad_pcb",
+  "repository": "OpenDrone/hardware/OpenESC-30x30"
+ },
+ "station": "ESC-30",
+ "tp_csv_vs_board_mm": 0.0
+}
