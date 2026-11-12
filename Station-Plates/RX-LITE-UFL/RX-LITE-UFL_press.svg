@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="114mm" height="114mm" viewBox="0 0 114 114">
+<!-- Press plate: on bushings; a 3 mm foam pad (outline + 2 mm) under it presses the up-facing parts. Red: cut. Blue: engrave. Units mm. -->
+<g fill="none" stroke="#ff0000" stroke-width="0.1">
+<polygon points="2,112 112,112 112,2 2,2"/>
+<circle cx="12" cy="102" r="7.5"/>
+<circle cx="12" cy="12" r="7.5"/>
+<circle cx="102" cy="102" r="7.5"/>
+<circle cx="102" cy="12" r="7.5"/>
+</g><g fill="#0000ff" font-family="sans-serif">
+<text x="54" y="68.775" font-size="2">+ clamp</text>
+<text x="28" y="10" font-size="3">RX-LITE-UFL press</text>
+<text x="28" y="108" font-size="2.2">OpenRX-Lite-UFL rev2 src 6514c91b t=8 mm, view from above</text>
+</g></svg>
