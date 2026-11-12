@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="114mm" height="114mm" viewBox="0 0 114 114">
+<!-- Press plate: rides on bushings, carries the SWD pogo pins onto the MCU face. Red: cut. Blue: engrave. Units mm. -->
+<g fill="none" stroke="#ff0000" stroke-width="0.1">
+<polygon points="2,112 112,112 112,2 2,2"/>
+<circle cx="12" cy="102" r="7.5"/>
+<circle cx="12" cy="12" r="7.5"/>
+<circle cx="102" cy="102" r="7.5"/>
+<circle cx="102" cy="12" r="7.5"/>
+<circle cx="52.293" cy="61.45" r="0.85"/>
+<circle cx="52.233" cy="52.36" r="0.85"/>
+<circle cx="61.693" cy="55.03" r="0.85"/>
+<circle cx="54.833" cy="61.45" r="0.85"/>
+<circle cx="54.773" cy="52.36" r="0.85"/>
+<circle cx="59.153" cy="55.03" r="0.85"/>
+<circle cx="61.763" cy="45.37" r="0.85"/>
+<circle cx="59.223" cy="45.37" r="0.85"/>
+<circle cx="72.25" cy="40.55" r="2.4"/>
+<circle cx="72.25" cy="71.05" r="2.4"/>
+<circle cx="41.75" cy="40.55" r="2.4"/>
+<circle cx="41.75" cy="71.05" r="2.4"/>
+</g><g fill="#0000ff" font-family="sans-serif">
+<text x="54" y="58" font-size="2">+ clamp</text>
+<text x="28" y="10" font-size="3">ESC-30 press</text>
+<text x="28" y="108" font-size="2.2">OpenESC-30x30 rev3.3 src d5994feb t=8 mm, view from above</text>
+</g></svg>

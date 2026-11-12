@@ -1,0 +1,4 @@
+plate,kind,ref,net,pin,x_mm,y_mm,hole_mm
+support+nest,usb notch,USB1,,opens left,-9.17,-2.427,13
+nest,pocket,slot 1,,outline + 0.15,0,23.638,0
+nest,pocket,slot 2,,outline + 0.15,0,-23.638,0
