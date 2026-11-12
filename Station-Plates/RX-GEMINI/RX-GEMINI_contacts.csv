@@ -1,0 +1,6 @@
+plate,kind,ref,net,pin,x_mm,y_mm,hole_mm
+pogo,pin,TP1,RX,"castellation, F side down, land 1.90 x 1.45",7.2,-6.875,1.7
+pogo,pin,TP2,TX,"castellation, F side down, land 1.90 x 1.45",4.66,-6.875,1.7
+pogo,pin,TP3,5V,"castellation, F side down, land 1.90 x 1.45",2.12,-6.875,1.7
+pogo,pin,TP4,GND,"castellation, F side down, land 1.90 x 1.45",-0.42,-6.875,1.7
+pogo,pin,TP5,BOOT,"pad, F side down, land 1.50 x 1.50",7.435,6.785,1.7

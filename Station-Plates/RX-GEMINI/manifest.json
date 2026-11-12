@@ -1,0 +1,106 @@
+{
+ "board_bbox_mm": [
+  17.05,
+  15.75
+ ],
+ "generated_by": "Station-Plates/generate.py",
+ "min_web_mm": {
+  "pogo": {
+   "between": [
+    "TP2 TX",
+    "TP3 5V"
+   ],
+   "web": 0.84
+  }
+ },
+ "params": {
+  "bushing_d": 15.0,
+  "dowel_clear": 1.0,
+  "dowel_under": 0.2,
+  "fc_ledge": 1.0,
+  "fc_part_clear": 0.5,
+  "fc_slot_gap": 20.0,
+  "fc_slots": 2,
+  "fc_usb_notch_w": 13.0,
+  "kerf": 0.0,
+  "margin": 30.0,
+  "min_web": 0.4,
+  "phase_hole": 2.0,
+  "plate_min": 110.0,
+  "pocket_clearance": 0.15,
+  "power_hole": 2.0,
+  "power_pins_per_pad": 2,
+  "rod_d": 8.0,
+  "rod_inset": 10.0,
+  "rx_edge_inset": 0.25,
+  "rx_hole_clear": 0.1,
+  "rx_part_clear": 0.3,
+  "rx_pin_hole": 1.7,
+  "rx_pocket_clearance": 0.1,
+  "rx_support_t": 3.0,
+  "rx_tip_r": 0.35,
+  "signal_hole": 1.7,
+  "stack_screw_d": 4.3,
+  "stack_screw_inset": 10.0,
+  "swd_hole": 1.7,
+  "wire_window": 6.0
+ },
+ "plates": [
+  {
+   "name": "base",
+   "note": "Base: holds the guide rods (press fit), window for the pogo wire tails",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 8
+  },
+  {
+   "name": "pogo",
+   "note": "Bottom pogo plate: spring pins up into the receiver's top side (face down)",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 8
+  },
+  {
+   "name": "support",
+   "note": "Support: the board rests on it; windows clear the down-facing parts, holes pass the pins",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 3.0
+  },
+  {
+   "name": "nest",
+   "note": "Nest: board pocket = outline + clearance",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 3
+  },
+  {
+   "name": "press",
+   "note": "Press plate: on bushings; a 3 mm foam pad (outline + 2 mm) under it presses the up-facing parts",
+   "size_mm": [
+    110.0,
+    110.0
+   ],
+   "thickness_mm": 8
+  }
+ ],
+ "positions_csv": "boards/OpenRX-Gemini/rev2/OpenRX-Gemini-rev2_positions.csv",
+ "revision": "rev2",
+ "sku": "OpenRX-Gemini",
+ "source": {
+  "commit": "1046520c9b5fffc90504243a7315212917db9945",
+  "dirty": false,
+  "path": "hardware/OpenRX-Gemini.kicad_pcb",
+  "repository": "OpenDrone/hardware/OpenRX-Gemini"
+ },
+ "station": "RX-GEMINI",
+ "tp_csv_vs_board_mm": 0.0
+}

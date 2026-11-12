@@ -10,7 +10,7 @@ line.
 | `OpenESC-30x30-QC/` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) | Press-contact QC fixture, a negative of the ESC contact face |
 | `OpenESC-30x30-Flashing/` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) | ST-LINK pogo-pin SWD flashing station. |
 | `OpenMotor-Seesaw/` | OpenMotor | Filming and demo jig: five laser-cut ply plates and one printed motor mount, seesaw on an M8 bolt in two 608ZZ, parametric generator and 3D viewer; not a KiCad project |
-| `Station-Plates/` | OpenESC-20x20, OpenESC-30x30, OpenFC-Lite-Mini, OpenFC-Lite | Laser-cut acrylic plates for the factory test stations (ESC: bottom pogo plate, nest, SWD press plate on guide rods; FC: two-board nest), generated from the released board revision; not a KiCad project |
+| `Station-Plates/` | OpenESC-20x20, OpenESC-30x30, OpenFC-Lite-Mini, OpenFC-Lite | Laser-cut acrylic plates for the factory test stations (ESC: bottom pogo plate, nest, SWD press plate on guide rods; FC: two-board nest; RX: one-receiver pogo jig per design), generated from the released board revision; not a KiCad project |
 
 ## Contributing
 

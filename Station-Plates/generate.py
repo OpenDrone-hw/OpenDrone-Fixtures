@@ -81,7 +81,14 @@ P = {
     "fc_ledge": 1.0,             # support-plate ledge under the board edge
     "fc_part_clear": 0.5,        # around bottom-side parts in the support window
     "fc_usb_notch_w": 13.0,      # USB-C plug overmould width
-    "fc_stand_d": 3.2,           # M3 holes for standoffs / feet
+    # RX jig (one receiver, face down; founder 12 Nov: simple jig per design)
+    "rx_pin_hole": 1.7,          # P75-class receptacle hole (verify)
+    "rx_edge_inset": 0.25,       # pin landing kept this far inside the board edge
+    "rx_hole_clear": 0.1,
+    "rx_tip_r": 0.35,            # pogo tip radius kept on the pad when a pin is moved off centre        # landing kept this far off a castellation's half hole
+    "rx_part_clear": 0.3,        # around parts in the support and press windows
+    "rx_support_t": 3.0,         # support plate: at least the tallest down-facing part (U.FL on Lite-UFL)
+    "rx_pocket_clearance": 0.1,  # the pocket wall locates the castellated edge over the pin row
 }
 
 STATIONS = {
@@ -89,6 +96,10 @@ STATIONS = {
     "ESC-30": {"kind": "esc", "sku": "OpenESC-30x30", "rev": "rev3.3", "contact_fp": "4in1ESC30x30"},
     "FC-20": {"kind": "fc", "sku": "OpenFC-Lite-Mini", "rev": "rev3.3"},
     "FC-30": {"kind": "fc", "sku": "OpenFC-Lite", "rev": "rev3.3"},
+    "RX-LITE": {"kind": "rx", "sku": "OpenRX-Lite", "rev": "rev2"},
+    "RX-LITE-UFL": {"kind": "rx", "sku": "OpenRX-Lite-UFL", "rev": "rev2"},
+    "RX-MONO": {"kind": "rx", "sku": "OpenRX-Mono", "rev": "rev2"},
+    "RX-GEMINI": {"kind": "rx", "sku": "OpenRX-Gemini", "rev": "rev2"},
 }
 
 
@@ -455,6 +466,146 @@ def build_fc(station, cfg, board, tps, src):
     return plates, rows, {}, (bw, bh)
 
 
+# ------------------------------------------------------------------ RX
+def rx_targets(board):
+    """Every TP* pad from the board (the positions file may leave one out, as
+    Gemini's TP5), with a pin landing point on copper: the pad's box clipped to
+    the outline inset by `rx_edge_inset`, minus a castellation's half hole."""
+    inner = inflate(outline_set(board), -P["rx_edge_inset"])
+    out = []
+    for fp in board.GetFootprints():
+        ref = fp.GetReference()
+        if not ref.startswith("TP"):
+            continue
+        pads = sorted(fp.Pads(), key=lambda pd: -pd.GetBoundingBox().GetWidth() * pd.GetBoundingBox().GetHeight())
+        pd = pads[0]
+        bb = pd.GetBoundingBox()
+        land = rect_set(mm(bb.GetLeft()), mm(bb.GetTop()), mm(bb.GetRight()), mm(bb.GetBottom()))
+        land.BooleanIntersection(inner)
+        if pd.GetDrillSizeX() > 0:
+            r = mm(pd.GetDrillSizeX()) / 2 + P["rx_hole_clear"]
+            x, y = mm(pd.GetPosition().x), mm(pd.GetPosition().y)
+            land.BooleanSubtract(rect_set(x - r, y - r, x + r, y + r))
+        if land.OutlineCount() == 0:
+            sys.exit("%s: no copper inside the outline to land a pin on" % ref)
+        lb = land.BBox()
+        side = "both" if pd.IsOnLayer(pcbnew.F_Cu) and pd.IsOnLayer(pcbnew.B_Cu) else \
+            ("top" if pd.IsOnLayer(pcbnew.F_Cu) else "bottom")
+        out.append((ref, pd.GetNetname(), side, mm(lb.GetCenter().x), mm(lb.GetCenter().y), mm(lb.GetWidth()), mm(lb.GetHeight())))
+    return sorted(out, key=lambda t: int(t[0][2:]))
+
+
+def spread(targets):
+    """Two receptacles closer than hole + min_web (TP4 and TP5 on Lite and Mono):
+    move both apart inside their landing boxes, keeping `rx_tip_r` of pad
+    around the tip. A castellation pin moves only along the edge."""
+    need = P["rx_pin_hole"] + P["min_web"] + 0.05
+    t = [list(x) for x in targets]
+    for _ in range(50):
+        moved = False
+        for i in range(len(t)):
+            for j in range(i + 1, len(t)):
+                a, b = t[i], t[j]
+                dx, dy = b[3] - a[3], b[4] - a[4]
+                d = math.hypot(dx, dy)
+                if d >= need - 1e-6 or d == 0:
+                    continue
+                k = (need - d) / 2 / d
+                for p_, sgn in ((a, -1), (b, 1)):
+                    ox, oy = p_[7] if len(p_) > 7 else (p_[3], p_[4])
+                    if len(p_) == 7:
+                        p_.append((ox, oy))
+                    mx = max(p_[5] / 2 - P["rx_tip_r"], 0)
+                    my = 0 if p_[2] == "both" else max(p_[6] / 2 - P["rx_tip_r"], 0)
+                    nx = min(max(p_[3] + sgn * dx * k, ox - mx), ox + mx)
+                    ny = min(max(p_[4] + sgn * dy * k, oy - my), oy + my)
+                    if abs(nx - p_[3]) > 1e-6 or abs(ny - p_[4]) > 1e-6:
+                        p_[3], p_[4], moved = nx, ny, True
+        if not moved:
+            break
+    return [tuple(x[:7]) for x in t]
+
+
+def part_boxes(board, layer, grow):
+    ps = pcbnew.SHAPE_POLY_SET()
+    for fp in board.GetFootprints():
+        if fp.GetLayer() != layer or fp.GetReference().startswith("TP"):
+            continue
+        fb = fp.GetBoundingBox(False)
+        ps.BooleanAdd(rect_set(mm(fb.GetLeft()) - grow, mm(fb.GetTop()) - grow, mm(fb.GetRight()) + grow, mm(fb.GetBottom()) + grow))
+    return ps
+
+
+def build_rx(station, cfg, board, tps, src):
+    """One receiver, every test pad down on spring pins from below. TP1-TP4 are
+    castellations (both sides); the single-side BOOT pad TP5 decides which side
+    goes down: F (Lite, Lite-UFL, Gemini: face down, mirrored) or B (Mono, F up,
+    not mirrored). Down-facing parts sit in relief windows of the support plate.
+    Parts cover both sides up to the edges, so the press plate carries a foam pad
+    that presses the up-facing parts instead of a rim."""
+    bb = board.GetBoardEdgesBoundingBox()
+    cx, cy, bw, bh = mm(bb.GetCenter().x), mm(bb.GetCenter().y), mm(bb.GetWidth()), mm(bb.GetHeight())
+    targets = rx_targets(board)
+    down_b = any(t[2] == "bottom" for t in targets)
+    if down_b and any(t[2] == "top" for t in targets):
+        sys.exit("%s: test pads on both single sides; one press-down jig cannot reach both" % station)
+    down_layer, up_layer = (pcbnew.B_Cu, pcbnew.F_Cu) if down_b else (pcbnew.F_Cu, pcbnew.B_Cu)
+    f = Frame(cx, cy, not down_b)
+    w, h = plate_size(bw, bh)
+    missing = [t[0] for t in targets if t[0] not in tps]
+    rows = []
+    roles = {"U0RXD": "RX", "U0TXD": "TX", "+5V": "5V", "GND": "GND", "BOOT": "BOOT"}
+
+    def role(net):
+        for k, v in roles.items():
+            if k in net.upper() or k in net:
+                return v
+        return net or "?"
+
+    base = Plate("base", 8, w, h, "Base: holds the guide rods (press fit), window for the pogo wire tails")
+    rods(base, P["rod_d"], "guide rod, press fit")
+    stack_screws(base)
+    ww, wh = bw / 2 + P["wire_window"], bh / 2 + P["wire_window"]
+    base.polys.append([(-ww, -wh), (ww, -wh), (ww, wh), (-ww, wh)])
+
+    pogo = Plate("pogo", 8, w, h, "Bottom pogo plate: spring pins up into the receiver's top side (face down)")
+    rods(pogo, P["rod_d"] + 0.1, "guide rod, slide fit")
+    stack_screws(pogo)
+    support = Plate("support", P["rx_support_t"], w, h,
+                    "Support: the board rests on it; windows clear the down-facing parts, holes pass the pins")
+    rods(support, P["rod_d"] + 0.1, "guide rod, slide fit")
+    stack_screws(support)
+    nest = Plate("nest", 3, w, h, "Nest: board pocket = outline + clearance")
+    rods(nest, P["rod_d"] + 0.1, "guide rod, slide fit")
+    stack_screws(nest)
+    press = Plate("press", 8, w, h, "Press plate: on bushings; a 3 mm foam pad (outline + 2 mm) under it presses the up-facing parts")
+    rods(press, P["bushing_d"], "linear bushing")
+
+    targets = spread(targets)
+    sup_win = [f.pts(ch) for ch in poly_points(part_boxes(board, down_layer, P["rx_part_clear"]))]
+    for ref, net, side, x, y, lw, lh in targets:
+        px, py = f(x, y)
+        r = role(net)
+        if True:
+            pogo.hole(px, py, P["rx_pin_hole"], "%s %s" % (ref, r))
+            c = P["rx_pin_hole"] / 2 + 0.3
+            sup_win.append([(px - c, py - c), (px + c, py - c), (px + c, py + c), (px - c, py + c)])
+            rows.append(("pogo", "pin", ref, r, "%s, %s side down, land %.2f x %.2f" % (
+                "castellation" if side == "both" else "pad", "B" if down_b else "F", lw, lh), px, py, P["rx_pin_hole"]))
+    cut_plate(support, sup_win)
+    pocket = inflate(outline_set(board), P["rx_pocket_clearance"] + P["kerf"] / 2)
+    for ch in poly_points(pocket):
+        nest.polys.append(f.pts(ch))
+    press.text.append((-3, -bh / 2 - 6, 2.0, "+ clamp"))
+    plates = [base, pogo, support, nest, press]
+    for pl in plates:
+        label(pl, station, cfg["rev"], src)
+    checks = {"pogo": min_web([hh for hh in pogo.holes if "stack" not in hh[3] and "rod" not in hh[3]])}
+    if missing:
+        print("  %s: %s not in the positions file, taken from the board" % (station, ", ".join(missing)))
+    return plates, rows, checks, (bw, bh)
+
+
 # ------------------------------------------------------------------ writers
 def fmt(v):
     return ("%.3f" % v).rstrip("0").rstrip(".")
@@ -547,7 +698,7 @@ def main():
         board = load_board(src)
         tps = read_tps(positions)
         worst = check_tps(board, tps)
-        build = build_esc if cfg["kind"] == "esc" else build_fc
+        build = {"esc": build_esc, "fc": build_fc, "rx": build_rx}[cfg["kind"]]
         plates, rows, checks, size = build(st, cfg, board, tps, src)
         m = write_station(st, cfg, plates, rows, checks, size, src, worst, positions)
         webs = ", ".join("%s %s" % (k, "-" if v is None else "%.2f mm" % v["web"]) for k, v in m["min_web_mm"].items())
@@ -555,7 +706,7 @@ def main():
             st, cfg["sku"], cfg["rev"], "/".join(p.name for p in plates),
             sum(len(p.holes) for p in plates), worst, webs or "n/a"))
         for k, v in m["min_web_mm"].items():
-            if v is not None and v["web"] < P["min_web"]:
+            if v is not None and v["web"] < P["min_web"] - 1e-3:
                 print("  FAIL %s: %.2f mm acrylic between %s and %s" % (k, v["web"], v["between"][0], v["between"][1]))
                 bad = 1
     sys.exit(bad)

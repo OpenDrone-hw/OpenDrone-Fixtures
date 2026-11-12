@@ -2,7 +2,8 @@
 
 Laser-cut acrylic plates for the factory test stations, one station per
 product. Generated from the released board revision, so a new board revision
-is a rerun, not a redraw. Not a KiCad project.
+is a rerun, not a redraw. Not a KiCad project. Stations: one per design
+(ESC, FC and RX).
 
 | Station | DUT | Plates (thickness) | Contacts |
 |---|---|---|---|
@@ -10,6 +11,7 @@ is a rerun, not a redraw. Not a KiCad project.
 | `ESC-30/` | [OpenESC-30x30](https://github.com/OpenDrone-hw/OpenESC-30x30) rev3.3 | base 8, pogo 8, nest 3, press 8 | same layout, its own pad map |
 | `FC-20/` | OpenFC-Lite-Mini rev3.3 | base 8, support 3, nest 3, cable bar 8 | none: the FC is tested through its USB-C and ESC plug; 2 board pockets |
 | `FC-30/` | OpenFC-Lite rev3.3 | base 8, support 3, nest 3, cable bar 8 | same, 2 board pockets |
+| `RX-LITE/`, `RX-LITE-UFL/`, `RX-MONO/`, `RX-GEMINI/` | OpenRX-Lite, -Lite-UFL, -Mono, -Gemini rev2 (test pads unchanged up to rev2.3) | base 8, pogo 8, support 3, nest 3, press 8 | 5 bottom pogo pins (RX, TX, 5V, GND, BOOT), one receiver per jig |
 
 Per station: `<station>_<plate>.svg` and `.dxf` (one per plate, cut and
 engrave layers), `<station>_contacts.csv` (every pogo pin, dowel and notch
@@ -62,6 +64,42 @@ crosses the other slot.
    ================  BASE 8 mm, rubber feet; all three screwed at the corners (M4)
    cable bar 8 mm screws across the USB and ESC cables
 ```
+
+## RX jig stack
+
+One receiver per jig, every test pad down on spring pins (founder 12 Nov:
+a simple press jig per RX design instead of the 64-place RX-flasher). TP1 to
+TP4 are castellations on both sides; the single-side BOOT pad TP5 decides
+which side goes down.
+
+| Jig | Side down | Mirrored | BOOT (TP5) | Note |
+|---|---|---|---|---|
+| RX-LITE, RX-LITE-UFL | F (face down) | yes | F pad 1.2 x 1.0 | TP4 and TP5 pins pushed apart inside their pads for 0.44 mm acrylic; U.FL faces down into the support window |
+| RX-MONO | B | no | B pad 1.0 x 1.3 | same push, 0.45 mm |
+| RX-GEMINI | F (face down) | yes | F round 1.5 mm | TP5 is missing from the positions file and is taken from the board |
+
+```
+   ===o=======+=======o===  PRESS 8 mm on bushings, 3 mm foam pad (outline + 2 mm) under it
+      |    [ receiver ]  |  NEST 3 mm, pocket = outline + 0.1 mm: its wall puts the castellated edge over the pin row
+   ===o====|=|=|=|=|====o===  SUPPORT 3 mm, windows clear the down-facing parts, holes pass the pins
+   ===o====|=|=|=|=|====o===  POGO 8 mm, 5 receptacles
+   ===o====|_______|====o===  BASE 8 mm, rods press fit, window for the wire tails
+```
+
+| Landing | Rule |
+|---|---|
+| Castellation (TP1 to TP4) | middle of the pad's copper on the board, off the half hole by 0.1 mm and 0.25 mm inside the edge: about 1.25 mm in from the half-hole centre. The 8x8 RX-flasher's 0.7 to 0.8 mm was forced by its BOOT pad position; here every pin follows its own pad |
+| BOOT (TP5) | the pad centre from the receiver board, never the 8x8 flasher's coordinates (0.54 mm off on Lite) |
+| Moved pins | when two receptacles leave less than `min_web`, both move apart inside their pads, keeping `rx_tip_r` (0.35 mm) of pad round the tip; a castellation pin moves only along the edge |
+
+Parts cover both sides of these boards up to the edges, so nothing rigid can
+press the board: the foam pad does, and the board rests on the pins and on
+what the support windows leave. Check the first cut with a board before a
+batch.
+
+Wiring rule for the station (not part of the plates): power the receiver (5V)
+before driving RX or BOOT, or put series resistors in RX and BOOT, so an
+unpowered receiver is never fed through its I/O pins.
 
 ## Sources
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="114mm" height="114mm" viewBox="0 0 114 114">
+<!-- Support: the board rests on it; windows clear the down-facing parts, holes pass the pins. Red: cut. Blue: engrave. Units mm. -->
+<g fill="none" stroke="#ff0000" stroke-width="0.1">
+<polygon points="112,2 2,2 2,112 112,112"/>
+<polygon points="54.834,62.65 52.534,62.65 52.534,60.8 51.45,60.8 51.45,58.5 51.725,58.5 51.725,57.375 51.725,55.975 51.725,55.275 53.775,55.275 53.775,55.975 53.825,55.975 53.825,55.275 54.825,55.275 54.825,54.99 52.26,54.99 52.26,51.01 55.875,51.01 55.875,50.975 56.575,50.975 57.925,50.975 57.925,51 60.15,51 60.15,51.065 60.565,51.065 62.135,51.065 62.135,53.535 61.725,53.535 61.725,54.1 62.1,54.1 62.1,59.5 56.7,59.5 56.7,57.725 55.875,57.725 55.875,58.325 55.175,58.325 55.175,59.125 53.75,59.125 53.75,60.35 54.682,60.35 56.982,60.35 56.982,62.65"/>
+<polygon points="57.126,62.65 57.126,60.35 59.426,60.35 59.426,62.65"/>
+<polygon points="59.658,62.65 59.658,60.35 61.958,60.35 61.958,62.65"/>
+<circle cx="12" cy="102" r="4.05"/>
+<circle cx="12" cy="12" r="4.05"/>
+<circle cx="102" cy="102" r="4.05"/>
+<circle cx="102" cy="12" r="4.05"/>
+<circle cx="57" cy="12" r="2.15"/>
+<circle cx="57" cy="102" r="2.15"/>
+<circle cx="102" cy="57" r="2.15"/>
+<circle cx="12" cy="57" r="2.15"/>
+</g><g fill="#0000ff" font-family="sans-serif">
+<text x="28" y="10" font-size="3">RX-LITE support</text>
+<text x="28" y="108" font-size="2.2">OpenRX-Lite rev2 src 3f71e0ab t=3 mm, view from above</text>
+</g></svg>

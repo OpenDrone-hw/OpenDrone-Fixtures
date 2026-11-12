@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="114mm" height="114mm" viewBox="0 0 114 114">
+<!-- Base: holds the guide rods (press fit), window for the pogo wire tails. Red: cut. Blue: engrave. Units mm. -->
+<g fill="none" stroke="#ff0000" stroke-width="0.1">
+<polygon points="2,112 112,112 112,2 2,2"/>
+<polygon points="45.975,71.675 68.025,71.675 68.025,42.325 45.975,42.325"/>
+<circle cx="12" cy="102" r="4"/>
+<circle cx="12" cy="12" r="4"/>
+<circle cx="102" cy="102" r="4"/>
+<circle cx="102" cy="12" r="4"/>
+<circle cx="57" cy="12" r="2.15"/>
+<circle cx="57" cy="102" r="2.15"/>
+<circle cx="102" cy="57" r="2.15"/>
+<circle cx="12" cy="57" r="2.15"/>
+</g><g fill="#0000ff" font-family="sans-serif">
+<text x="28" y="10" font-size="3">RX-MONO base</text>
+<text x="28" y="108" font-size="2.2">OpenRX-Mono rev2 src d63ab303 t=8 mm, view from above</text>
+</g></svg>
