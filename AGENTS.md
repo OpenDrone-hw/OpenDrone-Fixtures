@@ -41,48 +41,16 @@ kicad-cli pcb drc --schematic-parity --refill-zones <dir>/<stem>.kicad_pcb
 
 The two QC schematics are empty stubs (the fixture is laid out directly on
 the board), so for them ERC is empty and schematic parity lists every
-footprint; the two Flashing projects have a real schematic. On macOS
-`kicad-cli` is at `/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli`;
-`KPY` is KiCad's bundled Python,
-`/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3`.
-Never text-edit `.kicad_sch`, `.kicad_pcb` or `.kicad_dru`; use KiCad, or
-kicad-skip and the pcbnew API, with KiCad closed.
+footprint; the two Flashing projects have a real schematic.
 
 ## Rules
 
-Identical in every OpenDrone board repo. Do not edit here; edit the template.
+The shared [Board rules](https://github.com/OpenDrone-hw/hardware-template/blob/main/AGENTS.md#board-rules) apply. Only what differs for this board is listed here.
 
-- **Never text-edit** `.kicad_sch`, `.kicad_pcb` or `.kicad_dru`. Use KiCad, or
-  kicad-skip / the pcbnew API for scripted changes. `.kicad_pro` is JSON and may
-  be edited directly for metadata.
-  kicad-skip cannot round-trip KiCad 10 schematics: use a full S-expression
-  parser, `kicad-cli sch upgrade --force`, then an ERC and netlist diff.
-- **Metadata yes, connections no.** An agent may write BOM and documentation
-  fields (MPN, Manufacturer, LCSC, Cost, Datasheet, text variables). An agent
-  may not change nets, wiring, routing, placement, footprint assignment, or any
-  value that changes the circuit.
-- **Close KiCad before any write to a KiCad file.** KiCad caches library tables
-  at process start and overwrites files on save.
-- **Reuse before you draw.** Check the `OpenDrone` library and its
-  `PARTS-USED.md` first. If the part is there we have already sourced,
-  footprinted and shipped it, and its symbol links to the exact committed
-  datasheet: place it from `OpenDrone`. Draw a new part into `lib` only when
-  the catalogue has nothing that fits, imported with
-  `easyeda2kicad` from its LCSC number. Pulling a newer catalogue is a
-  deliberate, reviewed commit: `git submodule update --remote
-  hardware/KiCad-Library`, then DRC.
-- **One person holds a board layout at a time.** KiCad files do not merge. Say
-  on Discord that you are taking it. See [CONTRIBUTING.md](CONTRIBUTING.md).
-- **Run ERC and DRC before every pull request.** Existing approved findings
-  may remain; a new type or increased count must be reviewed before merge.
-  Commands are in Environment above.
+- Libraries are project-local per fixture directory; there is no `KiCad-Library` submodule, so the shared library rules do not apply.
 
 ## By task
 
-Fixture paths are in the Repo table and Environment above. `KPY` is KiCad's
-bundled Python named there.
-
 - Check a fixture: run the ERC and DRC commands in Environment for the directory you changed, before every pull request.
-- Render a fixture for its README: `$KPY <hardware-tooling>/hardware/kicad/render_board.py <dir>/<stem>.kicad_pcb --outdir <dir>/images`, KiCad closed.
 - Verify contact positions: read the ESC pad coordinates from its `.kicad_pcb` with `kicad-cli` or the pcbnew API under `KPY`, compare with the fixture footprint in `<dir>/*.pretty/`; never modify the ESC design from here.
 - Add a part: import it into the directory's local library with `$KPY <hardware-tooling>/hardware/kicad/import_part.py --repo <dir>` (read `--help` first), KiCad closed.
